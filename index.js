@@ -165,6 +165,9 @@ const functions = {
           // 总结页退出：返回首页并恢复默认底栏
           emitUpdate('backgroundUrl', state.backgroundHome);
           emitUpdate('centerItems', state.defaultCenterItems);
+        } else if (payload.id === 'summary-review') {
+          // 回顾列表展开/收起：转发控制事件给检查页
+          pluginApi.emit(state.eventChannel, { type: 'control', action: 'summary', cmd: 'review' });
         } else if (payload.id === 'check-start') {
           // 从预览底栏触发检查开始，由轮播页执行跳转
           pluginApi.emit(state.eventChannel, { type: 'control', action: 'carousel', cmd: 'start-check' });

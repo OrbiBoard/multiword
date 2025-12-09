@@ -264,7 +264,7 @@
             const id = String(payload.id||'');
             if (id === 'check-settings') {
               try {
-                const float = new URL('../../../plugins/multiword/float/check-font.html', window.location.href).href;
+                const float = new URL('../float/check-font.html', window.location.href).href;
                 const u = new URL(float);
                 u.searchParams.set('server', server);
                 try {
@@ -280,7 +280,7 @@
             }
             if (id === 'carousel-settings') {
               try {
-                const float = new URL('../../../plugins/multiword/float/carousel-font.html', window.location.href).href;
+                const float = new URL('../float/carousel-font.html', window.location.href).href;
                 const u = new URL(float);
                 u.searchParams.set('server', server);
                 api().emitEvent(CH, { type:'update', target:'floatingBounds', value: { width: 740, height: 520 } });

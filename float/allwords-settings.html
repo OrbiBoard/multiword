@@ -45,7 +45,7 @@
       const toUrl = (page, params={}) => { const base = new URL(page, window.location.href); Object.entries(params).forEach(([k,v]) => base.searchParams.set(k, String(v))); return base.href; };
       const h = (id) => document.getElementById(id);
       h('start').onclick = () => {
-        const bg = new URL('../../../plugins/multiword/background/allwords.html', window.location.href).href;
+        const bg = new URL('../background/allwords.html', window.location.href).href;
         const full = toUrl(bg, { server, sort: h('sort').value, hint: h('hint').value });
         window.lowbarAPI.emitEvent(CH, { type:'update', target:'backgroundUrl', value: full });
         window.lowbarAPI.emitEvent(CH, { type:'update', target:'centerItems', value: [

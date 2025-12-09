@@ -106,9 +106,9 @@
             <i class="ri-search-eye-line"></i>
             <div class="label">检查模式</div>
           </div>
-          <div class="card square" data-act="dict">
-            <i class="ri-book-open-line"></i>
-            <div class="label">在线词典</div>
+          <div class="card square" data-act="quickcheck">
+            <i class="ri-flashlight-line"></i>
+            <div class="label">快速检查</div>
           </div>
         </div>
       </div>
@@ -160,27 +160,27 @@
             return base.href;
           };
           const openCarousel = () => {
-            const float = new URL('../../../plugins/multiword/float/range-select.html', window.location.href).href;
+            const float = new URL('./range-select.html', window.location.href).href;
             const href = toUrl(float, { server: String(u||'').trim(), next:'carousel' });
             window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'floatingBounds', value: { width: 980, height: 680 } });
             window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'floatingUrl', value: href });
           };
           const openAll = () => {
-            const float = new URL('../../../plugins/multiword/float/allwords-settings.html', window.location.href).href;
+            const float = new URL('./allwords-settings.html', window.location.href).href;
             const href = toUrl(float, { server: String(u||'').trim() });
             window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'floatingBounds', value: { width: 740, height: 520 } });
             window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'floatingUrl', value: href });
           };
           const openCheck = () => {
-            const float = new URL('../../../plugins/multiword/float/range-select.html', window.location.href).href;
+            const float = new URL('./range-select.html', window.location.href).href;
             const href = toUrl(float, { server: String(u||'').trim(), next:'check' });
             window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'floatingBounds', value: { width: 980, height: 680 } });
             window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'floatingUrl', value: href });
           };
-          const openDict = () => {
-            const float = new URL('../../../plugins/multiword/float/dict.html', window.location.href).href;
-            const href = toUrl(float, { server: String(u||'').trim() });
-            window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'floatingBounds', value: { width: 720, height: 560 } });
+          const openQuick = () => {
+            const float = new URL('./range-select.html', window.location.href).href;
+            const href = toUrl(float, { server: String(u||'').trim(), next:'quickcheck' });
+            window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'floatingBounds', value: { width: 980, height: 680 } });
             window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'floatingUrl', value: href });
           };
           // 卡片点击：上图标下文字，无嵌套按钮
@@ -191,7 +191,7 @@
                   case 'carousel': return openCarousel();
                   case 'all': return openAll();
                   case 'check': return openCheck();
-                  case 'dict': return openDict();
+                  case 'quickcheck': return openQuick();
                 }
               });
             });

@@ -97,7 +97,7 @@
         server: String(server||'').trim()
       };
       try { const selDays = Array.from(state.selectedDays||new Set()); if (selDays.length) { if (!state.pool.length) { try { await fetchPool(); } catch {} } const list = state.pool.filter(x => selDays.includes(fmtDay(x.createdAt||Date.now()))); const uniq = Array.from(new Set(list.map(x => String(x.word||'').toLowerCase()))); params.selected = uniq.join(','); } else { params.days = 7; } } catch { params.days = 7; }
-      const bg = new URL('../../../plugins/multiword/background/carousel.html', window.location.href).href;
+      const bg = new URL('../background/carousel.html', window.location.href).href;
       window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'backgroundUrl', value: toUrl(bg, params) });
       window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'centerItems', value: [
         { id:'carousel-prev', text:'上一页', icon:'ri-skip-back-line' },

@@ -80,7 +80,9 @@
     h('btnNext').onclick = () => {
       const target = next==='carousel' ? new URL('./carousel-settings.html', window.location.href).href : new URL('./check-setup.html', window.location.href).href;
       const sel = Array.from(state.selectedDays||new Set());
-      const href = toUrl(target, { server: String(server||'').trim(), daysel: sel.join(',') });
+      const params = { server: String(server||'').trim(), daysel: sel.join(',') };
+      if (next==='quickcheck') params.mode = 'quick';
+      const href = toUrl(target, params);
       try {
         const lb = window.lowbarAPI;
         if (lb) lb.emitEvent('multiword.lowbar', { type:'update', target:'floatingBounds', value: next==='carousel' ? { width:740, height:520 } : { width:840, height:580 } });

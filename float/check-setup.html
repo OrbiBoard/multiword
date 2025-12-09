@@ -100,6 +100,7 @@
     const server = qs.get('server')||'';
     const qsTitleSize = parseInt(String(qs.get('titlesize')||''),10);
     const qsCnSize = parseInt(String(qs.get('cnsize')||''),10);
+    const mode = String(qs.get('mode')||'').trim();
     const dayselParam = String(qs.get('daysel')||'').trim();
     document.getElementById('serverTip').textContent = server ? ('已连接：' + server) : '(未传递服务器参数)';
     const h = (id) => document.getElementById(id);
@@ -247,7 +248,7 @@
         cnsize: 24,
         selected: state.selected.join(',')
       };
-      const bg = new URL('../../../plugins/multiword/background/carousel.html', window.location.href).href;
+      const bg = new URL('../background/carousel.html', window.location.href).href;
       window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'backgroundUrl', value: toUrl(bg, params) });
       window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'centerItems', value: [
         { id:'carousel-prev', text:'上一页', icon:'ri-skip-back-line' },
@@ -288,7 +289,24 @@
       if (stepIdx===2) { showStep(3); return; }
       if (stepIdx===3) { h('preview').click(); return; }
     };
-    (async () => { await fetchPool(); showStep(1); })();
+    (async () => {
+      await fetchPool();
+      if (mode === 'quick') {
+        let pool = state.pool;
+        if (state.selectedDays && state.selectedDays.size) {
+          pool = pool.filter(x => state.selectedDays.has(fmtDay(x.createdAt||Date.now())));
+        }
+        const uniq = Array.from(new Set(pool.map(x => String(x.word||'').toLowerCase())));
+        const params = { selected: uniq.join(','), server: String(server||'').trim() };
+        const bg = new URL('../background/checker.html', window.location.href).href;
+        try {
+          window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'backgroundUrl', value: toUrl(bg, params) });
+          window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'floatingUrl', value: null });
+        } catch { location.href = toUrl(bg, params); }
+        return;
+      }
+      showStep(1);
+    })();
     function syncPickNum(){ try { const val = parseInt(String(h('pick').value||''),10); h('pickNum').textContent = Number.isFinite(val) && val>0 ? String(val) : '全部'; } catch {} }
     h('pickMinus').onclick = () => { try { const cur = parseInt(String(h('pick').value||''),10); const base = Number.isFinite(cur)?cur:0; const next = Math.max(0, base - 1); h('pick').value = next ? String(next) : ''; syncPickNum(); } catch {} };
     h('pickMinus10').onclick = () => { try { const cur = parseInt(String(h('pick').value||''),10); const base = Number.isFinite(cur)?cur:0; const next = Math.max(0, base - 10); h('pick').value = next ? String(next) : ''; syncPickNum(); } catch {} };

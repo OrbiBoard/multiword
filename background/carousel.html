@@ -22,6 +22,54 @@
   <script src="./carousel.js"></script>
   <script>
     (function(){
+      try {
+        var lb = window.lowbarAPI;
+        if (lb && typeof lb.emitEvent === 'function') {
+          var orig = lb.emitEvent.bind(lb);
+          lb.emitEvent = function(name, payload){
+            try {
+              if (payload && payload.type === 'update' && (payload.target === 'backgroundUrl' || payload.target === 'floatingUrl')) {
+                var val = String(payload.value||'');
+                try {
+                  var u = new URL(val, window.location.href);
+                  var p = u.pathname || '';
+                  if (p.indexOf('/plugins/multiword/') >= 0) {
+                    var rel = p.split('/plugins/multiword/')[1] || '';
+                    if (rel) {
+                      var fixed = new URL('../' + rel, window.location.href).href;
+                      payload = Object.assign({}, payload, { value: fixed });
+                    }
+                  }
+                } catch {}
+              }
+            } catch {}
+            return orig(name, payload);
+          };
+          try {
+            var CH = 'multiword.lowbar';
+            lb.subscribe && lb.subscribe(CH);
+            lb.onEvent && lb.onEvent(function(name, payload){
+              if (name !== CH || !payload) return;
+              if (payload.type === 'control' && payload.action === 'carousel' && String(payload.cmd||'') === 'start-check') {
+                try {
+                  var qs = new URLSearchParams(window.location.search||'');
+                  var sel = String(qs.get('selected')||'');
+                  var server = String(qs.get('server')||'');
+                  var base = new URL('../background/checker.html', window.location.href).href;
+                  var u = new URL(base);
+                  if (sel) u.searchParams.set('selected', sel);
+                  if (server) u.searchParams.set('server', server);
+                  lb.emitEvent(CH, { type:'update', target:'backgroundUrl', value: u.href });
+                } catch {}
+              }
+            });
+          } catch {}
+        }
+      } catch {}
+    })();
+  </script>
+  <script>
+    (function(){
       var t=null;var C=4;var origUpdate=typeof updatePageIndicator==='function'?updatePageIndicator:null;
       function rowH(){return Math.max(1,(lastItemH||60))+16}
       function pageStep(){try{var rows=Math.max(1,(lastRows||1));var pageH=rows*rowH()-16;var step=Math.max(rowH(),pageH-rowH());return step}catch{return rowH()}}
