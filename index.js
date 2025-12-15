@@ -139,7 +139,10 @@ const functions = {
         } else if (payload.id === 'carousel-toggle-cn') {
           pluginApi.emit(state.eventChannel, { type: 'control', action: 'carousel', cmd: 'toggle-cn' });
         } else if (payload.id === 'open-carousel-settings' || payload.id === 'carousel-settings') {
-          pluginApi.emit(state.eventChannel, { type: 'control', action: 'carousel', cmd: 'settings' });
+          const href = url.pathToFileURL(path.join(__dirname, 'float', 'carousel-font.html')).href;
+          emitUpdate('floatingBounds', 'center');
+          emitUpdate('floatingBounds', { width: 740, height: 520 });
+          emitUpdate('floatingUrl', href);
         } else if (payload.id === 'allwords-sort-time') {
           pluginApi.emit(state.eventChannel, { type: 'control', action: 'allwords', cmd: 'sort-time' });
         } else if (payload.id === 'allwords-sort-alpha') {

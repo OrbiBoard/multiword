@@ -246,7 +246,8 @@
               return `${get('year')}-${get('month')}-${get('day')} ${get('hour')}:${get('minute')}:${get('second')}`;
             } catch { return new Date(ms||Date.now()).toLocaleString(); }
           };
-          tbody.innerHTML = (j.words||[]).map(w => `<tr><td>${w.word}</td><td>${w.cn||''}</td><td>${fmt(w.createdAt)}</td></tr>`).join('');
+          const list = Array.isArray(j.words) ? j.words.slice().sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)) : [];
+          tbody.innerHTML = list.map(w => `<tr><td>${w.word}</td><td>${w.cn||''}</td><td>${fmt(w.createdAt)}</td></tr>`).join('');
         } catch { tbody.innerHTML = '<tr><td colspan="3">加载失败</td></tr>'; }
       };
       const syncUrl = async () => {
