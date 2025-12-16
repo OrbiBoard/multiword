@@ -134,8 +134,10 @@ const functions = {
         } else if (payload.id === 'carousel-stop') {
           pluginApi.emit(state.eventChannel, { type: 'control', action: 'carousel', cmd: 'stop' });
           // 结束轮播后恢复首页与默认底栏
+          emitUpdate('floatingUrl', null);
           emitUpdate('backgroundUrl', state.backgroundHome);
           emitUpdate('centerItems', state.defaultCenterItems);
+          emitUpdate('leftItems', [ { id: 'go-home', text: '返回首页', icon: 'ri-home-3-line' } ]);
         } else if (payload.id === 'carousel-toggle-cn') {
           pluginApi.emit(state.eventChannel, { type: 'control', action: 'carousel', cmd: 'toggle-cn' });
         } else if (payload.id === 'open-carousel-settings' || payload.id === 'carousel-settings') {
@@ -149,8 +151,10 @@ const functions = {
           pluginApi.emit(state.eventChannel, { type: 'control', action: 'allwords', cmd: 'sort-alpha' });
         } else if (payload.id === 'allwords-stop') {
           // 停止浏览：返回首页并恢复默认底栏
+          emitUpdate('floatingUrl', null);
           emitUpdate('backgroundUrl', state.backgroundHome);
           emitUpdate('centerItems', state.defaultCenterItems);
+          emitUpdate('leftItems', [ { id: 'go-home', text: '返回首页', icon: 'ri-home-3-line' } ]);
         } else if (payload.id === 'check-prev') {
           pluginApi.emit(state.eventChannel, { type: 'control', action: 'check', cmd: 'prev' });
         } else if (payload.id === 'check-next') {
@@ -168,6 +172,7 @@ const functions = {
           // 总结页退出：返回首页并恢复默认底栏
           emitUpdate('backgroundUrl', state.backgroundHome);
           emitUpdate('centerItems', state.defaultCenterItems);
+          emitUpdate('leftItems', [ { id: 'go-home', text: '返回首页', icon: 'ri-home-3-line' } ]);
         } else if (payload.id === 'summary-review') {
           // 回顾列表展开/收起：转发控制事件给检查页
           pluginApi.emit(state.eventChannel, { type: 'control', action: 'summary', cmd: 'review' });
@@ -180,6 +185,12 @@ const functions = {
           emitUpdate('floatingUrl', null);
           emitUpdate('backgroundUrl', state.backgroundHome);
           emitUpdate('centerItems', state.defaultCenterItems);
+          emitUpdate('leftItems', [ { id: 'go-home', text: '返回首页', icon: 'ri-home-3-line' } ]);
+        } else if (payload.id === 'export-open') {
+          const href = url.pathToFileURL(path.join(__dirname, 'float', 'export-menu.html')).href;
+          emitUpdate('floatingBounds', 'left');
+          emitUpdate('floatingBounds', { width: 280, height: 170 });
+          emitUpdate('floatingUrl', href);
         }
       }
       return true;

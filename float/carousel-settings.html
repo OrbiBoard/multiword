@@ -41,6 +41,7 @@
       <div class="row">
         <label>翻页时长（分钟:秒） <input type="number" id="flipmin" min="0" value="6" /> : <input type="number" id="flipsec" min="0" max="59" value="30" /> </label>
         <label>默认显示中文<select id="showcn"><option value="1">是</option><option value="0">否</option></select></label>
+        <label>排序顺序<select id="order"><option value="new-old">从新到旧</option><option value="old-new">从旧到新</option><option value="a-z">A-Z</option><option value="z-a">Z-A</option></select></label>
       </div>
       <div class="muted">单页显示数量将根据可视区域高度自动计算</div>
       <div class="ops">
@@ -94,9 +95,57 @@
       const params = {
         pagesec: Math.max(1,(parseInt(h('flipmin').value||'6',10)||0)*60 + (parseInt(h('flipsec').value||'30',10)||0)),
         showcn: String(h('showcn').value||'1'),
+        order: String(h('order').value||'new-old'),
         server: String(server||'').trim()
       };
-      try { const selDays = Array.from(state.selectedDays||new Set()); if (selDays.length) { if (!state.pool.length) { try { await fetchPool(); } catch {} } const list = state.pool.filter(x => selDays.includes(fmtDay(x.createdAt||Date.now()))); const uniq = Array.from(new Set(list.map(x => String(x.word||'').toLowerCase()))); params.selected = uniq.join(','); } else { params.days = 7; } } catch { params.days = 7; }
+      const rangeStr = (() => {
+        try {
+          const sel = Array.from(state.selectedDays||new Set());
+          if (sel.length) {
+            const sorted = sel.slice().sort();
+            return `${sorted[0]}~${sorted[sorted.length-1]}`;
+          } else {
+            const now = new Date();
+            const fmt = (d) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+            const end = fmt(now);
+            const startD = new Date(now.getFullYear(), now.getMonth(), now.getDate()-6);
+            const start = fmt(startD);
+            return `${start}~${end}`;
+          }
+        } catch { return ''; }
+      })();
+      if (rangeStr) params.range = rangeStr;
+      try {
+        const selDays = Array.from(state.selectedDays||new Set());
+        if (selDays.length) {
+          if (!state.pool.length) { try { await fetchPool(); } catch {} }
+          let list = state.pool.filter(x => selDays.includes(fmtDay(x.createdAt||Date.now())));
+          const ord = String(h('order').value||'new-old');
+          if (ord==='new-old') list.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+          else if (ord==='old-new') list.sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
+          else if (ord==='a-z') list.sort((a,b)=>String(a.word||'').localeCompare(String(b.word||'')));
+          else if (ord==='z-a') list.sort((a,b)=>String(b.word||'').localeCompare(String(a.word||'')));
+          const seen = new Set();
+          const seq = [];
+          for (const it of list) {
+            const w = String(it.word||'').toLowerCase();
+            if (!seen.has(w)) { seen.add(w); seq.push(w); }
+          }
+          params.selected = seq.join(',');
+        } else {
+          if (!state.pool.length) { try { await fetchPool(); } catch {} }
+          const cutoff = Date.now() - 7*24*3600*1000;
+          let list = state.pool.filter(x => (x.createdAt||0) >= cutoff);
+          const ord = String(h('order').value||'new-old');
+          if (ord==='new-old') list.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+          else if (ord==='old-new') list.sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
+          else if (ord==='a-z') list.sort((a,b)=>String(a.word||'').localeCompare(String(b.word||'')));
+          else if (ord==='z-a') list.sort((a,b)=>String(b.word||'').localeCompare(String(a.word||'')));
+          const seen = new Set(); const seq = [];
+          for (const it of list) { const w=String(it.word||'').toLowerCase(); if(!seen.has(w)){ seen.add(w); seq.push(w); } }
+          params.selected = seq.join(',');
+        }
+      } catch { params.days = 7; }
       const bg = new URL('../background/carousel.html', window.location.href).href;
       window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'backgroundUrl', value: toUrl(bg, params) });
       window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'centerItems', value: [
@@ -106,6 +155,10 @@
         { id:'carousel-toggle-cn', text:'中文开关', icon:'ri-translate' },
         { id:'open-carousel-settings', text:'轮播设置', icon:'ri-settings-3-line' },
         { id:'carousel-stop', text:'结束轮播', icon:'ri-stop-circle-line' }
+      ] });
+      window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'leftItems', value: [
+        { id: 'go-home', text: '返回首页', icon: 'ri-home-3-line' },
+        { id: 'export-open', text: '导出', icon: 'ri-download-2-line' }
       ] });
       window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'floatingUrl', value: null });
     };

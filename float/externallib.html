@@ -53,7 +53,7 @@
             <button id="showQRBind" title="生成二维码"><i class="ri-qr-code-line"></i></button>
           </div>
           <div id="status" style="margin-top:10px; opacity:.9">未连接</div>
-          <div class="subtle" style="margin-top:6px;">支持 http(s)；连接后可在下方直接开启轮播或全部展示。</div>
+          <div class="subtle" style="margin-top:6px;">支持 http(s)；连接后可在下方直接开启轮播或列表展示。</div>
         </div>
       </div>
 
@@ -100,7 +100,7 @@
           </div>
           <div class="card square" data-act="all">
             <i class="ri-list-check-2"></i>
-            <div class="label">全部展示</div>
+            <div class="label">列表展示</div>
           </div>
           <div class="card square" data-act="check">
             <i class="ri-search-eye-line"></i>
@@ -166,9 +166,9 @@
             window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'floatingUrl', value: href });
           };
           const openAll = () => {
-            const float = new URL('./allwords-settings.html', window.location.href).href;
-            const href = toUrl(float, { server: String(u||'').trim() });
-            window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'floatingBounds', value: { width: 740, height: 520 } });
+            const float = new URL('./range-select.html', window.location.href).href;
+            const href = toUrl(float, { server: String(u||'').trim(), next:'allwords' });
+            window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'floatingBounds', value: { width: 980, height: 680 } });
             window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'floatingUrl', value: href });
           };
           const openCheck = () => {

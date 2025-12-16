@@ -87,5 +87,138 @@
       try{var st=document.querySelector('.stage');st&&st.addEventListener('scroll',function(){try{if(t)clearTimeout(t)}catch{};t=setTimeout(updateIndicatorStable,160)})}catch{}
     })();
   </script>
+  <script>
+    (function exportBind(){
+      try {
+        var style=document.getElementById('print-style');
+        if(!style){
+          style=document.createElement('style'); style.id='print-style';
+          style.textContent = `
+            body.print-mode { background:#ffffff !important; color:#111 !important; }
+            body.print-mode .statusbar { background:#f7f7f7 !important; color:#111 !important; border-bottom:1px solid #ddd !important; }
+            body.print-mode .stage { background:#fff !important; }
+            body.print-mode .item { background:#fff !important; border-color:#ddd !important; }
+            body.print-mode .word { color:#111 !important; }
+            body.print-mode .cn { color:#555 !important; }
+            body.print-mode .sep-line { background:#e9e9e9 !important; }
+          `;
+          document.head.appendChild(style);
+        }
+      } catch {}
+      try {
+        var lb = window.lowbarAPI; var CH='multiword.lowbar';
+        lb && lb.subscribe && lb.subscribe(CH);
+        lb && lb.onEvent && lb.onEvent(function(name, payload){
+          if (name !== CH || !payload || payload.type !== 'control' || payload.action !== 'export') return;
+          var cmd = String(payload.cmd||'');
+          if (cmd === 'image') exportImage();
+          else if (cmd === 'word') exportWord();
+        });
+      } catch {}
+      function exportImage(){
+        try { document.body.classList.add('print-mode'); } catch {}
+        try {
+          var stage = document.querySelector('.stage');
+          var grid = document.getElementById('grid');
+          if (!stage || !grid) return;
+          var pageH = (typeof getPageHeight==='function') ? Math.max(1,getPageHeight()) : Math.max(200, stage.clientHeight||600);
+          var w = Math.max(640, stage.clientWidth||window.innerWidth||1280);
+          var columns = 2;
+          var colW = Math.floor(w / columns);
+          var paddingX = 12, paddingY = 10, lineGap = 6;
+          var items = Array.from(grid.querySelectorAll('.item'));
+          var stageRect = stage.getBoundingClientRect();
+          function getFont(el, sel){
+            try { var target = el.querySelector(sel); var cs = target ? getComputedStyle(target) : null; var size = (cs && cs.fontSize) ? cs.fontSize : '20px'; return parseInt(size,10)||20; } catch { return 20; }
+          }
+          function wrapText(ctx, text, x, y, maxW, lineH){
+            var words = String(text||'').split(/(\s+)/); var line=''; var yy=y;
+            for(var i=0;i<words.length;i++){
+              var test = line + words[i];
+              if (ctx.measureText(test).width > maxW && line) { ctx.fillText(line, x, yy); yy += lineH; line = words[i].trimStart(); }
+              else line = test;
+            }
+            if (line) ctx.fillText(line, x, yy);
+            return yy + lineH;
+          }
+          var totalPages = Math.max(1, Math.ceil(stage.scrollHeight / pageH));
+          for (var p=0; p<totalPages; p++){
+            var startY = (grid.offsetTop||0) + p*pageH;
+            var endY = startY + pageH;
+            var cvs = document.createElement('canvas'); cvs.width=w; cvs.height=pageH;
+            var ctx = cvs.getContext('2d');
+            ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,w,pageH);
+            var qs = new URLSearchParams(window.location.search||''); var range = String(qs.get('range')||'').trim();
+            ctx.fillStyle='#111'; ctx.font='bold 16px system-ui, Arial';
+            if (range) ctx.fillText('导出范围：'+range, 12, 22);
+            var colX = [0, colW, colW*2, colW*3];
+            var nextY = [paddingY, paddingY, paddingY, paddingY];
+            var pageItems = items.filter(function(el){
+              var rect = el.getBoundingClientRect();
+              var top = rect.top - stageRect.top + (stage.scrollTop||0) + (grid.offsetTop||0);
+              var bottom = top + rect.height;
+              return !(bottom < startY || top > endY);
+            });
+            pageItems.forEach(function(el, idxAll){
+              var idx = idxAll % columns;
+              var x0 = colX[idx] + paddingX;
+              var y0 = nextY[idx];
+              var wf = getFont(el, '.word'); var cf = getFont(el, '.cn');
+              var word = (el.querySelector('.word')?.textContent||'').trim();
+              var cn = (el.querySelector('.cn')?.textContent||'').trim();
+              ctx.fillStyle='#111'; ctx.font = 'bold '+wf+'px system-ui, Arial';
+              ctx.fillText(word, x0, y0 + wf);
+              ctx.fillStyle='#555'; ctx.font = cf+'px system-ui, Arial';
+              var ydone = wrapText(ctx, cn, x0, y0 + wf + lineGap + cf, colW - paddingX*2, cf + 4);
+              nextY[idx] = ydone + lineGap;
+            });
+            var qs2 = new URLSearchParams(window.location.search||''); var range2 = String(qs2.get('range')||'').trim(); var rname = range2 ? ('-'+range2) : '';
+            var a = document.createElement('a');
+            a.download = '轮播展示-导出'+rname+'-第'+String(p+1)+'.png';
+            a.href = cvs.toDataURL('image/png'); a.click();
+          }
+        } finally {
+          try { document.body.classList.remove('print-mode'); } catch {}
+        }
+      }
+      function exportWord(){
+        var rows = Array.from(document.querySelectorAll('#grid .item')).map(function(el){
+          return { word: (el.querySelector('.word')?.textContent||'').trim(), cn: (el.querySelector('.cn')?.textContent||'').trim() };
+        });
+        function u(s){return new TextEncoder().encode(String(s||''))}
+        function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+        function crc32(arr){var table=window.__crc32||null;if(!table){table=new Uint32Array(256);for(let i=0;i<256;i++){let c=i;for(let k=0;k<8;k++){c=((c&1)?(0xEDB88320^(c>>>1)):(c>>>1))}table[i]=c>>>0}window.__crc32=table}var crc=0^(-1);for(let i=0;i<arr.length;i++){crc=(crc>>>8)^table[(crc^arr[i])&0xFF]}return (crc^(-1))>>>0}
+        function put32(view,off,val){view.setUint32(off,val,true)}
+        function put16(view,off,val){view.setUint16(off,val,true)}
+        function file(name,content,offset){var nameBytes=u(name);var cBytes=content;var h=new DataView(new ArrayBuffer(30));put32(h,0,0x04034b50);put16(h,4,20);put16(h,6,0);put16(h,8,0);put16(h,10,0);put16(h,12,0);var crc=crc32(cBytes);put32(h,14,crc);put32(h,18,cBytes.length);put32(h,22,cBytes.length);put16(h,26,nameBytes.length);put16(h,28,0);var local=new Uint8Array(h.byteLength+nameBytes.length+cBytes.length);local.set(new Uint8Array(h.buffer),0);local.set(nameBytes,30);local.set(cBytes,30+nameBytes.length);var c=new DataView(new ArrayBuffer(46));put32(c,0,0x02014b50);put16(c,4,20);put16(c,6,20);put16(c,8,0);put16(c,10,0);put16(c,12,0);put16(c,14,0);put32(c,16,crc);put32(c,20,cBytes.length);put32(c,24,cBytes.length);put16(c,28,nameBytes.length);put16(c,30,0);put16(c,32,0);put16(c,34,0);put16(c,36,0);put32(c,38,0);put32(c,42,offset);var central=new Uint8Array(c.byteLength+nameBytes.length);central.set(new Uint8Array(c.buffer),0);central.set(nameBytes,46);return {local,central}}
+        function end(count,size,offset){var e=new DataView(new ArrayBuffer(22));put32(e,0,0x06054b50);put16(e,4,0);put16(e,6,0);put16(e,8,count);put16(e,10,count);put32(e,12,size);put32(e,16,offset);put16(e,20,0);return new Uint8Array(e.buffer)}
+        var docXml=['<?xml version="1.0" encoding="UTF-8" standalone="yes"?>','<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>'].join('');
+        var qsR=new URLSearchParams(window.location.search||''); var rangeR=String(qsR.get('range')||'').trim();
+        docXml += '<w:p><w:r><w:t>轮播导出</w:t></w:r></w:p>';
+        if (rangeR) docXml += '<w:p><w:r><w:t>导出范围：'+esc(rangeR)+'</w:t></w:r></w:p>';
+        docXml += '<w:tbl><w:tblPr><w:tblBorders><w:top w:val="single" w:sz="4" w:color="auto"/><w:left w:val="single" w:sz="4" w:color="auto"/><w:bottom w:val="single" w:sz="4" w:color="auto"/><w:right w:val="single" w:sz="4" w:color="auto"/><w:insideH w:val="single" w:sz="2" w:color="auto"/><w:insideV w:val="single" w:sz="2" w:color="auto"/></w:tblBorders><w:tblCellMar><w:top w:w="0" w:type="dxa"/><w:left w:w="0" w:type="dxa"/><w:bottom w:w="0" w:type="dxa"/><w:right w:w="0" w:type="dxa"/></w:tblCellMar></w:tblPr><w:tblGrid><w:gridCol w:w="5000"/><w:gridCol w:w="5000"/></w:tblGrid>';
+        docXml += '<w:tr><w:tc><w:p><w:pPr><w:spacing w:after="0" w:before="0"/></w:pPr><w:r><w:t>单词</w:t></w:r></w:p></w:tc><w:tc><w:p><w:pPr><w:spacing w:after="0" w:before="0"/></w:pPr><w:r><w:t>汉语</w:t></w:r></w:p></w:tc></w:tr>';
+        rows.forEach(function(it){
+          var cnLen = String(it.cn||'').length; var cnSz = (cnLen>120)?18:((cnLen>60)?20:24);
+          docXml += '<w:tr><w:tc><w:p><w:pPr><w:spacing w:after="0" w:before="0"/></w:pPr><w:r><w:t>'+esc(it.word)+'</w:t></w:r></w:p></w:tc><w:tc><w:p><w:pPr><w:spacing w:after="0" w:before="0"/></w:pPr><w:r><w:rPr><w:sz w:val="'+String(cnSz)+'"/></w:rPr><w:t>'+esc(it.cn)+'</w:t></w:r></w:p></w:tc></w:tr>';
+        });
+        docXml += '</w:tbl>';
+        docXml += '<w:sectPr><w:pgMar w:top="720" w:right="720" w:bottom="720" w:left="720" w:header="708" w:footer="708" w:gutter="0"/><w:cols w:num="2" w:space="400"/></w:sectPr></w:body></w:document>';
+        var relsXml='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>';
+        var typesXml='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>';
+        var files=[['[Content_Types].xml',u(typesXml)],['_rels/.rels',u(relsXml)],['word/document.xml',u(docXml)]];
+        var locals=[], centrals=[], offset=0;
+        files.forEach(function(f){var pack=file(f[0],f[1],offset);locals.push(pack.local);offset+=pack.local.length;centrals.push(pack.central)});
+        var centralSize=centrals.reduce(function(a,b){return a+b.length},0);var endrec=end(files.length,centralSize,offset);
+        var outSize=offset+centralSize+endrec.length;var out=new Uint8Array(outSize);var cursor=0;
+        locals.forEach(function(buf){out.set(buf,cursor);cursor+=buf.length});
+        centrals.forEach(function(buf){out.set(buf,cursor);cursor+=buf.length});
+        out.set(endrec,cursor);
+        var qs3=new URLSearchParams(window.location.search||''); var range3=String(qs3.get('range')||'').trim(); var rname3=range3?('-'+range3):'';
+        var blob=new Blob([out],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
+        var a=document.createElement('a'); a.download='轮播导出'+rname3+'.docx'; a.href=URL.createObjectURL(blob); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href) },2000);
+      }
+    })();
+  </script>
   </body>
   </html>

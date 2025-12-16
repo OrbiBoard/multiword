@@ -3,18 +3,21 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>外部词库 · 全部展示</title>
+    <title>外部词库 · 列表展示</title>
     <link rel="stylesheet" href="../../../renderer/remixicon-local.css" />
     <style>
       body { margin:0; font-family: system-ui, sans-serif; background:#121212; color:#e6e6e6; }
       .wrap { padding: 16px; }
       .toolbar { display:flex; align-items:center; gap:10px; margin-bottom: 10px; }
       .list { border:1px solid #2c2c2c; border-radius: 10px; }
-      .row { display:grid; grid-template-columns: 1fr 2fr 140px; gap:10px; padding:8px 10px; border-bottom:1px solid #222; align-items:center; }
+      .row { display:grid; grid-template-columns: 1fr 2fr; gap:10px; padding:8px 10px; border-bottom:1px solid #222; align-items:center; }
       .row:nth-child(odd){ background:#1a1a1a; }
       .row:hover { background:#232323; cursor: pointer; }
       .muted { opacity: .85; }
       select, button { background:#1b1b1b; color:#e6e6e6; border:1px solid #2c2c2c; border-radius:8px; padding:6px 10px; }
+      .cell-cn { display:flex; flex-direction:column; gap:4px; }
+      .cell-cn .cn { font-size:14px; color:#cfd3d7; }
+      .cell-cn .time { font-size:12px; color:#9aa0a6; }
     </style>
   </head>
   <body>
@@ -49,7 +52,7 @@
               return `${get('year')}-${get('month')}-${get('day')} ${get('hour')}:${get('minute')}:${get('second')}`;
             } catch { return new Date(ms||Date.now()).toLocaleString(); }
           };
-          root.innerHTML = items.map(it => `<div class='row' data-word='${it.word}'><div><b>${it.word||''}</b></div><div class='muted'>${it.cn || (Array.isArray(it.translations)? it.translations.map(t=>t.cn).join('；') : '')}</div><div class='muted'>${fmt(it.createdAt)}</div></div>`).join('');
+          root.innerHTML = items.map(it => `<div class='row' data-word='${it.word}'><div style="font-weight:600;">${it.word||''}</div><div class='cell-cn'><div class='cn'>${it.cn || (Array.isArray(it.translations)? it.translations.map(t=>t.cn).join('；') : '')}</div><div class='time'>${fmt(it.createdAt)}</div></div></div>`).join('');
           root.querySelectorAll('.row').forEach(r => {
             r.addEventListener('click', () => {
               const w = r.getAttribute('data-word');
@@ -67,7 +70,21 @@
           if (!base) base = 'http://localhost:6100';
           const u = new URL('/words', base);
           const r = await fetch(u.href); const json = await r.json();
-          all = Array.isArray(json?.words) ? json.words : []; render();
+          let list = Array.isArray(json?.words) ? json.words : [];
+          const sel = String(qs.get('selected')||'').trim();
+          if (sel) {
+            const seq = sel.split(',').map(s=>s.trim().toLowerCase()).filter(Boolean);
+            const byWord = new Map();
+            for (const it of list) {
+              const w = String(it.word||'').toLowerCase();
+              if (!byWord.has(w)) byWord.set(w, it);
+            }
+            const ordered = [];
+            for (const w of seq) { if (byWord.has(w)) ordered.push(byWord.get(w)); }
+            list = ordered.length ? ordered : list;
+          }
+          all = list;
+          render();
         } catch (e) {
           document.getElementById('list').innerHTML = `<div class='row'><div>加载失败 / 未连接词库</div><div class='muted'>${e?.message||'请在“外部词库”页绑定，或通过 server 参数传入地址'}</div><div></div></div>`;
         }
@@ -85,6 +102,109 @@
         });
       } catch {}
       (async function init(){ await load(); })();
+      (function exportBind(){
+        try {
+          let style=document.getElementById('print-style-all');
+          if(!style){
+            style=document.createElement('style'); style.id='print-style-all';
+            style.textContent = `
+              body.print-mode { background:#ffffff !important; color:#111 !important; }
+              body.print-mode .wrap { background:#fff !important; }
+              body.print-mode .row { background:#fff !important; border-bottom-color:#e9e9e9 !important; }
+              body.print-mode .muted { color:#555 !important; }
+            `;
+            document.head.appendChild(style);
+          }
+        } catch {}
+        try {
+          api().subscribe(CH);
+          api().onEvent((name,payload)=>{
+            if (name !== CH || !payload || payload.type !== 'control' || payload.action !== 'export') return;
+            const cmd = String(payload.cmd||'');
+            if (cmd === 'image') exportImage();
+            else if (cmd === 'word') exportWord();
+          });
+        } catch {}
+        function exportImage(){
+          try { document.body.classList.add('print-mode'); } catch {}
+          try {
+            const root = document.getElementById('list');
+            const rect = root.getBoundingClientRect();
+            const w = Math.max(640, rect.width||window.innerWidth||1280);
+            const rows = Array.from(root.querySelectorAll('.row'));
+            const col = 2; const colW = Math.floor(w/col);
+            const paddingX=12, paddingY=10, lineGap=6;
+            const headerH=28;
+            const estH = Math.max(200, headerH + rows.length * 34 / col + paddingY*2);
+            const cvs = document.createElement('canvas'); cvs.width=w; cvs.height=estH;
+            const ctx = cvs.getContext('2d'); ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,w,estH);
+            const qs = new URLSearchParams(window.location.search||''); const range = String(qs.get('range')||'').trim();
+            ctx.fillStyle='#111'; ctx.font='bold 16px system-ui, Arial';
+            if (range) ctx.fillText('导出范围：'+range, 12, 22);
+            const colX=[0,colW]; const nextY=[headerH+paddingY,headerH+paddingY];
+            function wrapText(text, maxW, fontSize){ ctx.font=fontSize+'px system-ui, Arial'; const words=String(text||'').split(/(\s+)/); let line=''; let lines=[]; for(let i=0;i<words.length;i++){ const test=line+words[i]; if(ctx.measureText(test).width>maxW&&line){ lines.push(line); line=words[i].trimStart(); } else line=test; } if(line) lines.push(line); return lines; }
+            rows.forEach((r,idx)=>{
+              const idxCol = idx % col;
+              const x = colX[idxCol] + paddingX;
+              let y = nextY[idxCol];
+              const wtxt = (r.querySelector('.row > div:nth-child(1)')?.textContent||'').trim();
+              const cntxt = (r.querySelector('.row .cn')?.textContent||'').trim();
+              const timetxt = (r.querySelector('.row .time')?.textContent||'').trim();
+              ctx.fillStyle='#111'; ctx.font='bold 18px system-ui, Arial'; ctx.fillText(wtxt, x, y+18);
+              const cnLines = wrapText(cntxt, colW - paddingX*2, 14);
+              ctx.fillStyle='#555'; cnLines.forEach((ln,i)=>{ ctx.fillText(ln, x, y+18+lineGap + 14 + i*(14+4)); });
+              const ycn = y+18+lineGap + 14 + cnLines.length*(14+4);
+              ctx.fillStyle='#777'; ctx.font='12px system-ui, Arial'; ctx.fillText(timetxt, x, ycn+12);
+              nextY[idxCol] = ycn + 12 + lineGap;
+            });
+            const rangeName = range ? ('-'+range) : '';
+            const a = document.createElement('a'); a.download = '列表展示-导出'+rangeName+'.png'; a.href = cvs.toDataURL('image/png'); a.click();
+          } finally {
+            try { document.body.classList.remove('print-mode'); } catch {}
+          }
+        }
+        function exportWord(){
+          const tz='Asia/Shanghai';
+          const fmt = (ms) => {
+            try {
+              const d = new Date(ms||Date.now());
+              const parts = new Intl.DateTimeFormat('zh-CN', { timeZone: tz, hour12: false, year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit' }).formatToParts(d);
+              const get = (t) => parts.find(p=>p.type===t)?.value || '';
+              return `${get('year')}-${get('month')}-${get('day')} ${get('hour')}:${get('minute')}:${get('second')}`;
+            } catch { return new Date(ms||Date.now()).toLocaleString(); }
+          };
+          const rows = (all||[]).map(it=>({ word: it.word||'', cn: it.cn||(Array.isArray(it.translations)?it.translations.map(t=>t.cn).join('；'):''), time: fmt(it.createdAt) }));
+          function u(s){return new TextEncoder().encode(String(s||''))}
+          function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+          function crc32(arr){var table=window.__crc32||null;if(!table){table=new Uint32Array(256);for(let i=0;i<256;i++){let c=i;for(let k=0;k<8;k++){c=((c&1)?(0xEDB88320^(c>>>1)):(c>>>1))}table[i]=c>>>0}window.__crc32=table}var crc=0^(-1);for(let i=0;i<arr.length;i++){crc=(crc>>>8)^table[(crc^arr[i])&0xFF]}return (crc^(-1))>>>0}
+          function put32(view,off,val){view.setUint32(off,val,true)}
+          function put16(view,off,val){view.setUint16(off,val,true)}
+          function file(name,content,offset){var nameBytes=u(name);var cBytes=content;var h=new DataView(new ArrayBuffer(30));put32(h,0,0x04034b50);put16(h,4,20);put16(h,6,0);put16(h,8,0);put16(h,10,0);put16(h,12,0);var crc=crc32(cBytes);put32(h,14,crc);put32(h,18,cBytes.length);put32(h,22,cBytes.length);put16(h,26,nameBytes.length);put16(h,28,0);var local=new Uint8Array(h.byteLength+nameBytes.length+cBytes.length);local.set(new Uint8Array(h.buffer),0);local.set(nameBytes,30);local.set(cBytes,30+nameBytes.length);var c=new DataView(new ArrayBuffer(46));put32(c,0,0x02014b50);put16(c,4,20);put16(c,6,20);put16(c,8,0);put16(c,10,0);put16(c,12,0);put16(c,14,0);put32(c,16,crc);put32(c,20,cBytes.length);put32(c,24,cBytes.length);put16(c,28,nameBytes.length);put16(c,30,0);put16(c,32,0);put16(c,34,0);put16(c,36,0);put32(c,38,0);put32(c,42,offset);var central=new Uint8Array(c.byteLength+nameBytes.length);central.set(new Uint8Array(c.buffer),0);central.set(nameBytes,46);return {local,central}}
+          function end(count,size,offset){var e=new DataView(new ArrayBuffer(22));put32(e,0,0x06054b50);put16(e,4,0);put16(e,6,0);put16(e,8,count);put16(e,10,count);put32(e,12,size);put32(e,16,offset);put16(e,20,0);return new Uint8Array(e.buffer)}
+          let docXml=['<?xml version="1.0" encoding="UTF-8" standalone="yes"?>','<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>'].join('');
+          const qsR=new URLSearchParams(window.location.search||''); const rangeR=String(qsR.get('range')||'').trim();
+          docXml += '<w:p><w:r><w:t>词库导出</w:t></w:r></w:p>';
+          if (rangeR) docXml += '<w:p><w:r><w:t>导出范围：'+esc(rangeR)+'</w:t></w:r></w:p>';
+          docXml += '<w:tbl><w:tblPr><w:tblBorders><w:top w:val="single" w:sz="4" w:color="auto"/><w:left w:val="single" w:sz="4" w:color="auto"/><w:bottom w:val="single" w:sz="4" w:color="auto"/><w:right w:val="single" w:sz="4" w:color="auto"/><w:insideH w:val="single" w:sz="2" w:color="auto"/><w:insideV w:val="single" w:sz="2" w:color="auto"/></w:tblBorders><w:tblCellMar><w:top w:w="0" w:type="dxa"/><w:left w:w="0" w:type="dxa"/><w:bottom w:w="0" w:type="dxa"/><w:right w:w="0" w:type="dxa"/></w:tblCellMar></w:tblPr><w:tblGrid><w:gridCol w:w="5000"/><w:gridCol w:w="5000"/></w:tblGrid>';
+          docXml += '<w:tr><w:tc><w:p><w:pPr><w:spacing w:after="0" w:before="0"/></w:pPr><w:r><w:t>单词</w:t></w:r></w:p></w:tc><w:tc><w:p><w:pPr><w:spacing w:after="0" w:before="0"/></w:pPr><w:r><w:t>汉语</w:t></w:r></w:p></w:tc></w:tr>';
+          rows.forEach(it=>{ const cnLen=String(it.cn||'').length; const cnSz=(cnLen>120)?18:((cnLen>60)?20:24); docXml += '<w:tr><w:tc><w:p><w:pPr><w:spacing w:after="0" w:before="0"/></w:pPr><w:r><w:t>'+esc(it.word)+'</w:t></w:r></w:p></w:tc><w:tc><w:p><w:pPr><w:spacing w:after="0" w:before="0"/></w:pPr><w:r><w:rPr><w:sz w:val="'+String(cnSz)+'"/></w:rPr><w:t>'+esc(it.cn)+'</w:t></w:r></w:p></w:tc></w:tr>'; });
+          docXml += '</w:tbl>';
+          docXml += '<w:sectPr><w:pgMar w:top="720" w:right="720" w:bottom="720" w:left="720" w:header="708" w:footer="708" w:gutter="0"/><w:cols w:num="2" w:space="400"/></w:sectPr></w:body></w:document>';
+          const relsXml='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>';
+          const typesXml='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>';
+          const files=[['[Content_Types].xml',u(typesXml)],['_rels/.rels',u(relsXml)],['word/document.xml',u(docXml)]];
+          const locals=[], centrals=[]; let offset=0;
+          files.forEach(f=>{const pack=file(f[0],f[1],offset);locals.push(pack.local);offset+=pack.local.length;centrals.push(pack.central)});
+          const centralSize=centrals.reduce((a,b)=>a+b.length,0); const endrec=end(files.length,centralSize,offset);
+          const outSize=offset+centralSize+endrec.length; const out=new Uint8Array(outSize); let cursor=0;
+          locals.forEach(buf=>{out.set(buf,cursor);cursor+=buf.length});
+          centrals.forEach(buf=>{out.set(buf,cursor);cursor+=buf.length});
+          out.set(endrec,cursor);
+          const qs3=new URLSearchParams(window.location.search||''); const range3=String(qs3.get('range')||'').trim(); const rname3=range3?('-'+range3):'';
+          const blob=new Blob([out],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
+          const a=document.createElement('a'); a.download='词库导出'+rname3+'.docx'; a.href=URL.createObjectURL(blob); a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+        }
+      })();
     </script>
   </body>
   </html>

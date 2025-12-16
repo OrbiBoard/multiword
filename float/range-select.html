@@ -78,14 +78,16 @@
     function buildQuickSelectors(){ const q=[{k:'today',t:'今天'},{k:'3',t:'近3天'},{k:'7',t:'近7天'},{k:'30',t:'近30天'},{k:'week',t:'本周'},{k:'month',t:'本月'},{k:'clear',t:'清空选择'}]; h('quickSel').innerHTML = q.map(x=>`<button class="quickbtn" data-k="${x.k}">${x.t}</button>`).join(''); document.querySelectorAll('.quickbtn').forEach(b=>{ b.addEventListener('click',()=>{ const k=String(b.getAttribute('data-k')||''); const now=new Date(); if(k==='clear'){ state.selectedDays.clear(); buildCalendar(); return; } if(k==='today'){ state.selectedDays=new Set([fmtDay(Date.now())]); buildCalendar(); return; } if(['3','7','30'].includes(k)){ const n=parseInt(k,10)||0; const s=new Set(); for(let i=0;i<n;i++){ const d=new Date(now.getFullYear(), now.getMonth(), now.getDate()-i); s.add(fmtDay(d)); } state.selectedDays=s; buildCalendar(); return; } if(k==='week'){ const wd=(now.getDay()||7)-1; const s=new Set(); for(let i=0;i<=wd;i++){ const d=new Date(now.getFullYear(), now.getMonth(), now.getDate()-i); s.add(fmtDay(d)); } state.selectedDays=s; buildCalendar(); return; } if(k==='month'){ const s=new Set(); const y=now.getFullYear(); const m=now.getMonth(); const days=new Date(y,m+1,0).getDate(); for(let d=1; d<=days; d++){ s.add(fmtDay(new Date(y,m,d))); } state.month={y, m:m+1}; state.selectedDays=s; buildCalendar(); return; } }); }); }
     h('btnPrev').onclick = () => { try { window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'floatingUrl', value: new URL('./externallib.html', window.location.href).href }); } catch {} };
     h('btnNext').onclick = () => {
-      const target = next==='carousel' ? new URL('./carousel-settings.html', window.location.href).href : new URL('./check-setup.html', window.location.href).href;
+      const target = next==='carousel' ? new URL('./carousel-settings.html', window.location.href).href
+        : (next==='allwords' ? new URL('./allwords-settings.html', window.location.href).href : new URL('./check-setup.html', window.location.href).href);
       const sel = Array.from(state.selectedDays||new Set());
       const params = { server: String(server||'').trim(), daysel: sel.join(',') };
       if (next==='quickcheck') params.mode = 'quick';
       const href = toUrl(target, params);
       try {
         const lb = window.lowbarAPI;
-        if (lb) lb.emitEvent('multiword.lowbar', { type:'update', target:'floatingBounds', value: next==='carousel' ? { width:740, height:520 } : { width:840, height:580 } });
+        if (lb) lb.emitEvent('multiword.lowbar', { type:'update', target:'floatingBounds', value:
+          next==='carousel' ? { width:740, height:520 } : (next==='allwords' ? { width:740, height:520 } : { width:840, height:580 }) });
         lb.emitEvent('multiword.lowbar', { type:'update', target:'floatingUrl', value: href });
       } catch { location.href = href; }
     };
