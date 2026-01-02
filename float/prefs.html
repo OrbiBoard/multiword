@@ -36,7 +36,7 @@
       const enCarouselEl = document.getElementById('enableCarousel');
       const shuffleEl = document.getElementById('shuffleAfterCarousel');
       const load = async () => {
-        try { const r = await api().pluginCall('multi.word', 'getPreferences'); const p = (r && r.prefs) || {}; voiceEl.value = p.voice || 'ALL'; enCarouselEl.checked = !!p.enableCarousel; shuffleEl.checked = !!p.shuffleAfterCarousel; } catch {}
+        try { const r = await api().pluginCall('multi.word', 'getPreferences'); const p = (r && r.prefs) || {}; voiceEl.value = p.voice || 'ALL'; enCarouselEl.checked = !!p.enableCarousel; shuffleEl.checked = !!p.shuffleAfterCarousel; } catch (e) {}
       };
       const save = async () => {
         const prefs = { voice: voiceEl.value, enableCarousel: enCarouselEl.checked, shuffleAfterCarousel: shuffleEl.checked };

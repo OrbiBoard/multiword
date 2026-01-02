@@ -145,7 +145,7 @@
       const addResEl = document.getElementById('addResult');
 
       const showBindOnly = () => { bindPanel.style.display = ''; connectedPanel.style.display = 'none'; };
-      const isLocalUrl = (u) => { try { const url = new URL(u); return ['localhost','127.0.0.1','::1'].includes(url.hostname); } catch { return false; } };
+      const isLocalUrl = (u) => { try { const url = new URL(u); return ['localhost','127.0.0.1','::1'].includes(url.hostname); } catch (e) { return false; } };
       const showConnected = (u) => {
         bindPanel.style.display = 'none'; connectedPanel.style.display = ''; connectedUrlEl.textContent = u;
         // 界面简化：默认不提供数据设置，统一隐藏“添加词汇”和“词库列表”区块
@@ -195,9 +195,9 @@
                 }
               });
             });
-          } catch {}
+          } catch (e) {}
           // 保持首页为四个正方形卡片入口
-        } catch {}
+        } catch (e) {}
         try {
           const btnQR = document.getElementById('showQR');
           if (btnQR) {
@@ -220,18 +220,18 @@
               const close = document.createElement('button');
               close.innerHTML = '<i class="ri-close-line"></i> 关闭';
               close.style.cssText = 'margin-top:6px;';
-              close.onclick = () => { try { document.body.removeChild(overlay); } catch {} };
+              close.onclick = () => { try { document.body.removeChild(overlay); } catch (e) {} };
               box.appendChild(title); box.appendChild(img); box.appendChild(link); box.appendChild(close);
               overlay.appendChild(box);
               overlay.addEventListener('click', (e) => { if (e.target === overlay) close.click(); });
               document.body.appendChild(overlay);
             });
           }
-        } catch {}
+        } catch (e) {}
       };
 
       const fetchHealth = async (base) => {
-        try { const r = await fetch(base.replace(/\/$/, '') + '/health'); const j = await r.json(); return !!(j && j.ok); } catch { return false; }
+        try { const r = await fetch(base.replace(/\/$/, '') + '/health'); const j = await r.json(); return !!(j && j.ok); } catch (e) { return false; }
       };
       const loadWords = async (base) => {
         try {
@@ -244,11 +244,11 @@
               const parts = new Intl.DateTimeFormat('zh-CN', { timeZone: tz, hour12: false, year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit' }).formatToParts(d);
               const get = (t) => parts.find(p=>p.type===t)?.value || '';
               return `${get('year')}-${get('month')}-${get('day')} ${get('hour')}:${get('minute')}:${get('second')}`;
-            } catch { return new Date(ms||Date.now()).toLocaleString(); }
+            } catch (e) { return new Date(ms||Date.now()).toLocaleString(); }
           };
           const list = Array.isArray(j.words) ? j.words.slice().sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)) : [];
           tbody.innerHTML = list.map(w => `<tr><td>${w.word}</td><td>${w.cn||''}</td><td>${fmt(w.createdAt)}</td></tr>`).join('');
-        } catch { tbody.innerHTML = '<tr><td colspan="3">加载失败</td></tr>'; }
+        } catch (e) { tbody.innerHTML = '<tr><td colspan="3">加载失败</td></tr>'; }
       };
       const syncUrl = async () => {
         try {
@@ -256,7 +256,7 @@
           const saved = (r && r.url) || '';
           let last = saved;
           if (!last) {
-            try { last = localStorage.getItem('multiword.externallib.url') || ''; } catch {}
+            try { last = localStorage.getItem('multiword.externallib.url') || ''; } catch (e) {}
           }
           urlEl.value = last;
           if (!last) { statusEl.textContent = '未连接'; showBindOnly(); return; }
@@ -265,11 +265,11 @@
           if (ok) {
             showConnected(last);
             await loadWords(last);
-            if (!saved && last) { try { await api().pluginCall('multi.word', 'setWordbankUrl', [last]); } catch {} }
+            if (!saved && last) { try { await api().pluginCall('multi.word', 'setWordbankUrl', [last]); } catch (e) {} }
           } else {
             showBindOnly();
           }
-        } catch { showBindOnly(); }
+        } catch (e) { showBindOnly(); }
       };
       document.getElementById('save').addEventListener('click', async () => {
         try {
@@ -279,7 +279,7 @@
           const ok = await fetchHealth(s);
           statusEl.textContent = ok ? ('服务器健康正常：' + s) : ('无法连接：' + s);
           if (ok) {
-            try { localStorage.setItem('multiword.externallib.url', s); } catch {}
+            try { localStorage.setItem('multiword.externallib.url', s); } catch (e) {}
             showConnected(s);
             await loadWords(s);
           }
@@ -307,21 +307,21 @@
             const close = document.createElement('button');
             close.innerHTML = '<i class="ri-close-line"></i> 关闭';
             close.style.cssText = 'margin-top:6px;';
-            close.onclick = () => { try { document.body.removeChild(overlay); } catch {} };
+            close.onclick = () => { try { document.body.removeChild(overlay); } catch (e) {} };
             box.appendChild(title); box.appendChild(img); box.appendChild(link); box.appendChild(close);
             overlay.appendChild(box);
             overlay.addEventListener('click', (e) => { if (e.target === overlay) close.click(); });
             document.body.appendChild(overlay);
           });
         }
-      } catch {}
+      } catch (e) {}
       document.getElementById('disconnect').addEventListener('click', async () => {
         try {
           await api().pluginCall('multi.word', 'setWordbankUrl', ['']);
-          try { localStorage.removeItem('multiword.externallib.url'); } catch {}
+          try { localStorage.removeItem('multiword.externallib.url'); } catch (e) {}
           statusEl.textContent = '未连接';
           showBindOnly();
-        } catch {}
+        } catch (e) {}
       });
 
       document.getElementById('btnAdd').addEventListener('click', async () => {

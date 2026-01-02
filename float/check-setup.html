@@ -112,7 +112,7 @@
         const r = await fetch(u.href); const j = await r.json();
         const raw = Array.isArray(j?.words) ? j.words : [];
         state.pool = raw;
-      } catch { state.pool = []; }
+      } catch (e) { state.pool = []; }
     }
     function fmtDay(ms) {
       try {
@@ -121,7 +121,7 @@
         const parts = new Intl.DateTimeFormat('zh-CN', { timeZone: tz, hour12: false, year:'numeric', month:'2-digit', day:'2-digit' }).formatToParts(d);
         const get = (t) => parts.find(p=>p.type===t)?.value || '';
         return `${get('year')}-${get('month')}-${get('day')}`;
-      } catch { const d = new Date(ms||Date.now()); return [d.getFullYear(), String(d.getMonth()+1).padStart(2,'0'), String(d.getDate()).padStart(2,'0')].join('-'); }
+      } catch (e) { const d = new Date(ms||Date.now()); return [d.getFullYear(), String(d.getMonth()+1).padStart(2,'0'), String(d.getDate()).padStart(2,'0')].join('-'); }
     }
     function buildWeekheads() {
       const heads = ['一','二','三','四','五','六','日'];
@@ -174,7 +174,7 @@
         { k:'clear', t:'清空选择' }
       ];
       h('quickSel').innerHTML = q.map(x=>`<button class="quickbtn" data-k="${x.k}">${x.t}</button>`).join('');
-      try { const qr = h('quickRow'); if (qr) qr.innerHTML = q.map(x=>`<button class="quickbtn" data-k="${x.k}">${x.t}</button>`).join(''); } catch {}
+      try { const qr = h('quickRow'); if (qr) qr.innerHTML = q.map(x=>`<button class="quickbtn" data-k="${x.k}">${x.t}</button>`).join(''); } catch (e) {}
       document.querySelectorAll('.quickbtn').forEach(b=>{
         b.addEventListener('click', () => {
           const k = String(b.getAttribute('data-k')||'');
@@ -264,7 +264,7 @@
     try {
       if (Number.isFinite(qsTitleSize) && qsTitleSize>0) h('titlesize').value = String(qsTitleSize);
       if (Number.isFinite(qsCnSize) && qsCnSize>0) h('cnsize').value = String(qsCnSize);
-    } catch {}
+    } catch (e) {}
     let stepIdx = 1;
     function showStep(i) {
       stepIdx = Math.max(1, Math.min(3, i));
@@ -274,7 +274,7 @@
       try {
         const lb = window.lowbarAPI;
         if (lb) lb.emitEvent('multiword.lowbar', { type:'update', target:'floatingBounds', value: { width: 840, height: 580 } });
-      } catch {}
+      } catch (e) {}
     }
     h('btnPrev').onclick = () => {
       try {
@@ -282,7 +282,7 @@
         const href = toUrl(float, { server: String(server||'').trim(), next: 'check', daysel: Array.from(state.selectedDays||new Set()).join(',') });
         window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'floatingBounds', value: { width: 980, height: 680 } });
         window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'floatingUrl', value: href });
-      } catch {}
+      } catch (e) {}
     };
     h('btnNext').onclick = async () => {
       if (stepIdx===1) { await h('confirm').onclick(); showStep(2); return; }
@@ -302,16 +302,16 @@
         try {
           window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'backgroundUrl', value: toUrl(bg, params) });
           window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'floatingUrl', value: null });
-        } catch { location.href = toUrl(bg, params); }
+        } catch (e) { location.href = toUrl(bg, params); }
         return;
       }
       showStep(1);
     })();
-    function syncPickNum(){ try { const val = parseInt(String(h('pick').value||''),10); h('pickNum').textContent = Number.isFinite(val) && val>0 ? String(val) : '全部'; } catch {} }
-    h('pickMinus').onclick = () => { try { const cur = parseInt(String(h('pick').value||''),10); const base = Number.isFinite(cur)?cur:0; const next = Math.max(0, base - 1); h('pick').value = next ? String(next) : ''; syncPickNum(); } catch {} };
-    h('pickMinus10').onclick = () => { try { const cur = parseInt(String(h('pick').value||''),10); const base = Number.isFinite(cur)?cur:0; const next = Math.max(0, base - 10); h('pick').value = next ? String(next) : ''; syncPickNum(); } catch {} };
-    h('pickPlus').onclick = () => { try { const cur = parseInt(String(h('pick').value||''),10); const base = Number.isFinite(cur)?cur:0; const next = Math.max(1, base + 1); h('pick').value = String(next); syncPickNum(); } catch {} };
-    h('pickPlus10').onclick = () => { try { const cur = parseInt(String(h('pick').value||''),10); const base = Number.isFinite(cur)?cur:0; const next = Math.max(1, base + 10); h('pick').value = String(next); syncPickNum(); } catch {} };
+    function syncPickNum(){ try { const val = parseInt(String(h('pick').value||''),10); h('pickNum').textContent = Number.isFinite(val) && val>0 ? String(val) : '全部'; } catch (e) {} }
+    h('pickMinus').onclick = () => { try { const cur = parseInt(String(h('pick').value||''),10); const base = Number.isFinite(cur)?cur:0; const next = Math.max(0, base - 1); h('pick').value = next ? String(next) : ''; syncPickNum(); } catch (e) {} };
+    h('pickMinus10').onclick = () => { try { const cur = parseInt(String(h('pick').value||''),10); const base = Number.isFinite(cur)?cur:0; const next = Math.max(0, base - 10); h('pick').value = next ? String(next) : ''; syncPickNum(); } catch (e) {} };
+    h('pickPlus').onclick = () => { try { const cur = parseInt(String(h('pick').value||''),10); const base = Number.isFinite(cur)?cur:0; const next = Math.max(1, base + 1); h('pick').value = String(next); syncPickNum(); } catch (e) {} };
+    h('pickPlus10').onclick = () => { try { const cur = parseInt(String(h('pick').value||''),10); const base = Number.isFinite(cur)?cur:0; const next = Math.max(1, base + 10); h('pick').value = String(next); syncPickNum(); } catch (e) {} };
     syncPickNum();
   </script>
   <script>
@@ -329,7 +329,7 @@
           el.value = String(next);
         });
       });
-    } catch {}
+    } catch (e) {}
   </script>
 </body>
 </html>

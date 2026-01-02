@@ -50,16 +50,16 @@
               const parts = new Intl.DateTimeFormat('zh-CN', { timeZone: tz, hour12: false, year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit' }).formatToParts(d);
               const get = (t) => parts.find(p=>p.type===t)?.value || '';
               return `${get('year')}-${get('month')}-${get('day')} ${get('hour')}:${get('minute')}:${get('second')}`;
-            } catch { return new Date(ms||Date.now()).toLocaleString(); }
+            } catch (e) { return new Date(ms||Date.now()).toLocaleString(); }
           };
           root.innerHTML = items.map(it => `<div class='row' data-word='${it.word}'><div style="font-weight:600;">${it.word||''}</div><div class='cell-cn'><div class='cn'>${it.cn || (Array.isArray(it.translations)? it.translations.map(t=>t.cn).join('；') : '')}</div><div class='time'>${fmt(it.createdAt)}</div></div></div>`).join('');
           root.querySelectorAll('.row').forEach(r => {
             r.addEventListener('click', () => {
               const w = r.getAttribute('data-word');
-              try { api().pluginCall('multi.word','onLowbarEvent',[{ type:'click', id:'dictWord', word:String(w||'') }]); } catch {}
+              try { api().pluginCall('multi.word','onLowbarEvent',[{ type:'click', id:'dictWord', word:String(w||'') }]); } catch (e) {}
             });
           });
-        } catch {}
+        } catch (e) {}
       }
       async function load(){
         try {
@@ -100,7 +100,7 @@
           if (cmd === 'sort-time') { sortMode = 'time'; render(); }
           else if (cmd === 'sort-alpha') { sortMode = 'alpha'; render(); }
         });
-      } catch {}
+      } catch (e) {}
       (async function init(){ await load(); })();
       (function exportBind(){
         try {
@@ -115,7 +115,7 @@
             `;
             document.head.appendChild(style);
           }
-        } catch {}
+        } catch (e) {}
         try {
           api().subscribe(CH);
           api().onEvent((name,payload)=>{
@@ -124,9 +124,9 @@
             if (cmd === 'image') exportImage();
             else if (cmd === 'word') exportWord();
           });
-        } catch {}
+        } catch (e) {}
         function exportImage(){
-          try { document.body.classList.add('print-mode'); } catch {}
+          try { document.body.classList.add('print-mode'); } catch (e) {}
           try {
             const root = document.getElementById('list');
             const rect = root.getBoundingClientRect();
@@ -160,7 +160,7 @@
             const rangeName = range ? ('-'+range) : '';
             const a = document.createElement('a'); a.download = '列表展示-导出'+rangeName+'.png'; a.href = cvs.toDataURL('image/png'); a.click();
           } finally {
-            try { document.body.classList.remove('print-mode'); } catch {}
+            try { document.body.classList.remove('print-mode'); } catch (e) {}
           }
         }
         function exportWord(){
@@ -171,7 +171,7 @@
               const parts = new Intl.DateTimeFormat('zh-CN', { timeZone: tz, hour12: false, year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit' }).formatToParts(d);
               const get = (t) => parts.find(p=>p.type===t)?.value || '';
               return `${get('year')}-${get('month')}-${get('day')} ${get('hour')}:${get('minute')}:${get('second')}`;
-            } catch { return new Date(ms||Date.now()).toLocaleString(); }
+            } catch (e) { return new Date(ms||Date.now()).toLocaleString(); }
           };
           const rows = (all||[]).map(it=>({ word: it.word||'', cn: it.cn||(Array.isArray(it.translations)?it.translations.map(t=>t.cn).join('；'):''), time: fmt(it.createdAt) }));
           function u(s){return new TextEncoder().encode(String(s||''))}

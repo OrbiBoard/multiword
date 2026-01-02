@@ -54,7 +54,7 @@
           try {
             const r = await makeApi().pluginCall('multi.word', 'getPreferences');
             return (r && r.prefs) || { voice:'ALL', enableCarousel:true, shuffleAfterCarousel:false };
-          } catch { return { voice:'ALL', enableCarousel:true, shuffleAfterCarousel:false }; }
+          } catch (e) { return { voice:'ALL', enableCarousel:true, shuffleAfterCarousel:false }; }
         };
         const filterLrc = (text, voice) => {
           const lines = String(text||'').split(/\r?\n/);
@@ -82,7 +82,7 @@
         };
         document.getElementById('apply').addEventListener('click', applyLrc);
         document.getElementById('back').addEventListener('click', () => {
-          try { makeApi().emitEvent('multiword.lowbar', { type:'left.click', id:'go-home' }); } catch {}
+          try { makeApi().emitEvent('multiword.lowbar', { type:'left.click', id:'go-home' }); } catch (e) {}
         });
       })();
     </script>

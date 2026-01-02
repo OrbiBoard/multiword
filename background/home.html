@@ -38,7 +38,7 @@
         btn.addEventListener('click', () => {
           const id = btn.getAttribute('data-id');
           // 直接模拟底栏点击事件，后端 onLowbarEvent 将打开对应悬浮窗
-          try { api().pluginCall('multi.word', 'onLowbarEvent', [{ type: 'click', id }]); } catch {}
+          try { api().pluginCall('multi.word', 'onLowbarEvent', [{ type: 'click', id }]); } catch (e) {}
         });
       });
     </script>

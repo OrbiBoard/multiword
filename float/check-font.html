@@ -42,15 +42,15 @@
     const t = parseInt(String(qs.get('titlesize')||''),10);
     const c = parseInt(String(qs.get('cnsize')||''),10);
     const h = (id) => document.getElementById(id);
-    try { h('serverTip').textContent = server ? ('已连接：' + server) : ''; } catch {}
-    try { if (Number.isFinite(t) && t>0) h('titlesize').value = String(t); } catch {}
-    try { if (Number.isFinite(c) && c>0) h('cnsize').value = String(c); } catch {}
+    try { h('serverTip').textContent = server ? ('已连接：' + server) : ''; } catch (e) {}
+    try { if (Number.isFinite(t) && t>0) h('titlesize').value = String(t); } catch (e) {}
+    try { if (Number.isFinite(c) && c>0) h('cnsize').value = String(c); } catch (e) {}
     h('apply').onclick = () => {
       const titlesize = parseInt(h('titlesize').value||'54',10)||54;
       const cnsize = parseInt(h('cnsize').value||'30',10)||30;
-      try { window.lowbarAPI.emitEvent('multiword.lowbar', { type:'control', action:'check', cmd:'set-font', titlesize, cnsize }); } catch {}
+      try { window.lowbarAPI.emitEvent('multiword.lowbar', { type:'control', action:'check', cmd:'set-font', titlesize, cnsize }); } catch (e) {}
     };
-    h('close').onclick = () => { try { window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'floatingUrl', value: null }); } catch {} };
+    h('close').onclick = () => { try { window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'floatingUrl', value: null }); } catch (e) {} };
     try {
       document.querySelectorAll('.incdec[data-target]').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -65,7 +65,7 @@
           el.value = String(next);
         });
       });
-    } catch {}
+    } catch (e) {}
   </script>
 </body>
 </html>

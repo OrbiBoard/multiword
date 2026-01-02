@@ -52,7 +52,7 @@
           if (t) chunks.push(`.title { font-size: ${t}px !important; }`);
           if (c) chunks.push(`.cn { font-size: ${c}px !important; }`);
           style.textContent = chunks.join(' ');
-        } catch {}
+        } catch (e) {}
       }
       // 事件去抖：避免同一命令在极短时间内被重复触发（导致跳奇数/闪烁）
       let lastCmd = '';
@@ -83,7 +83,7 @@
           if (box) box.style.display = (box.style.display === 'none') ? '' : 'none';
         }
         else if (canon === 'summary-exit') {
-          try { api().emitEvent(CH, { type:'update', target:'backgroundUrl', value: null }); } catch {}
+          try { api().emitEvent(CH, { type:'update', target:'backgroundUrl', value: null }); } catch (e) {}
         }
       }
 
@@ -115,7 +115,7 @@
               { id:'check-random', text:'随机抽选', icon:'ri-shuffle-line' },
               { id:'check-stop', text:'结束提问', icon:'ri-stop-circle-line' }
             ] });
-          } catch {}
+          } catch (e) {}
           render();
         } catch (e) {
           wordEl.textContent = '加载失败';
@@ -138,9 +138,9 @@
         try {
           wordEl.onclick = () => {
             const ww = String(list[idx]?.word||'');
-            try { api().pluginCall('multi.word','onLowbarEvent',[{ type:'click', id:'dictWord', word: ww }]); } catch {}
+            try { api().pluginCall('multi.word','onLowbarEvent',[{ type:'click', id:'dictWord', word: ww }]); } catch (e) {}
           };
-        } catch {}
+        } catch (e) {}
       }
 
       function finish() {
@@ -175,17 +175,17 @@
           Array.from(review.querySelectorAll('.row')).forEach(el=>{
             el.addEventListener('click', ()=>{
               const w = el.getAttribute('data-w')||'';
-              try { api().pluginCall('multi.word','onLowbarEvent',[{ type:'click', id:'dictWord', word: w }]); } catch {}
+              try { api().pluginCall('multi.word','onLowbarEvent',[{ type:'click', id:'dictWord', word: w }]); } catch (e) {}
             });
           });
-        } catch {}
+        } catch (e) {}
         // 更新底栏为总结页按钮
         try {
           api().emitEvent(CH, { type:'update', target:'centerItems', value: [
             { id:'summary-review', text:'回顾列表', icon:'ri-list-check' },
             { id:'summary-exit', text:'退出提问', icon:'ri-close-circle-line' }
           ] });
-        } catch {}
+        } catch (e) {}
       }
       function prev() {
         idx = Math.max(0, idx-1); showCnCurrent = false; render();
@@ -229,10 +229,10 @@
             { id:'check-stop', text:'结束提问', icon:'ri-stop-circle-line' }
           ];
           api().emitEvent(CH, { type:'update', target:'centerItems', value: items });
-        } catch {}
+        } catch (e) {}
       }
       function randomPick() {
-        try { api().pluginCall('rollcall.random','openRollcallTemplate',[]); } catch {}
+        try { api().pluginCall('rollcall.random','openRollcallTemplate',[]); } catch (e) {}
       }
       function endCheck() { finish(); }
 
@@ -272,10 +272,10 @@
                   const curCn = parseInt(String(window.getComputedStyle(cnEl).fontSize||''),10);
                   if (Number.isFinite(curTitle)) u.searchParams.set('titlesize', String(curTitle));
                   if (Number.isFinite(curCn)) u.searchParams.set('cnsize', String(curCn));
-                } catch {}
+                } catch (e) {}
                 api().emitEvent(CH, { type:'update', target:'floatingBounds', value: { width: 740, height: 520 } });
                 api().emitEvent(CH, { type:'update', target:'floatingUrl', value: u.href });
-              } catch {}
+              } catch (e) {}
               return;
             }
             if (id === 'carousel-settings') {
@@ -285,13 +285,13 @@
                 u.searchParams.set('server', server);
                 api().emitEvent(CH, { type:'update', target:'floatingBounds', value: { width: 740, height: 520 } });
                 api().emitEvent(CH, { type:'update', target:'floatingUrl', value: u.href });
-              } catch {}
+              } catch (e) {}
               return;
             }
             handleCmd(id);
           }
         });
-      } catch {}
+      } catch (e) {}
 
       (async function init(){ await loadList(); })();
     </script>

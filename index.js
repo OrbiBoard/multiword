@@ -228,7 +228,7 @@ const functions = {
       try {
         const txt = fs.readFileSync(localJsonPath, 'utf-8');
         local = JSON.parse(txt);
-      } catch {}
+      } catch (e) {}
       // 远端 API 尝试（未知参数名，先尝试 ?word=）
       let remote = null;
       try {
@@ -244,7 +244,7 @@ const functions = {
             });
           }).on('error', reject);
         });
-      } catch {}
+      } catch (e) {}
       return { ok: true, remote, local };
     } catch (e) { return { ok: false, error: e?.message || String(e) }; }
   },
@@ -276,7 +276,7 @@ const init = async (api) => {
   api.splash.setStatus('plugin:init', '多维单词加载完成');
   try {
     store.ensureDefaults('multi-word', { prefs: { voice: 'ALL', enableCarousel: true, shuffleAfterCarousel: false }, wordbankUrl: '' });
-  } catch {}
+  } catch (e) {}
 };
 
 module.exports = {

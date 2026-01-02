@@ -271,7 +271,7 @@
         const n = fs != null ? parseInt(fs, 10) : null;
         const size = (!Number.isNaN(n) && n > 0) ? n : (q.get('zoom') ? 18 : null);
         if (size) { document.body.style.fontSize = size + 'px'; }
-      } catch {}
+      } catch (e) {}
     }
     async function fetchSuggest(prefix) {
       const box = document.getElementById('suggestions');
@@ -293,8 +293,8 @@
           const spaceBelow = (window.innerHeight || 800) - rect.bottom;
           const needAbove = spaceBelow < 200 || document.body.classList.contains('bar-bottom');
           box.classList.toggle('above', !!needAbove);
-        } catch {}
-      } catch {
+        } catch (e) {}
+      } catch (e) {
         // 接口不可用时也展示当前词作为兜底建议
         box.innerHTML = `<button class=\"sugg-item\" data-w=\"${prefix}\">${prefix}</button>`;
         box.style.display = 'block';
@@ -305,7 +305,7 @@
           const spaceBelow = (window.innerHeight || 800) - rect.bottom;
           const needAbove = spaceBelow < 200 || document.body.classList.contains('bar-bottom');
           box.classList.toggle('above', !!needAbove);
-        } catch {}
+        } catch (e) {}
       }
     }
     function normTranslations(src) {
@@ -320,7 +320,7 @@
         } else if (Array.isArray(src?.data)) {
           for (const it of src.data) arr.push({ pos: it.pos || '', cn: it.cn || it.translation || it.text || '' });
         }
-      } catch { }
+      } catch (e) { }
       return arr.filter(x => x.cn);
     }
     function renderDict(remote, local) {
@@ -364,12 +364,12 @@
     }
     async function lookupFallback(word) {
       let local = null, remote = null;
-      try { const r = await fetch('/renderer/a.json'); local = await r.json(); } catch { }
+      try { const r = await fetch('/renderer/a.json'); local = await r.json(); } catch (e) { }
       try {
         const u = new URL('https://v2.xxapi.cn/api/englishwords');
         u.searchParams.set('word', word);
         const r = await fetch(u.toString()); remote = await r.json();
-      } catch { }
+      } catch (e) { }
       return { local, remote };
     }
     async function queryWord(w) {
@@ -444,7 +444,7 @@
                    .replace(/\son\w+=\s*[^\s>]+/gi, '')
                    .replace(/<\/?(iframe|object|embed|form|input|button)[^>]*>/gi, '');
           return out;
-        } catch { return String(html||''); }
+        } catch (e) { return String(html||''); }
       }
     function sanitizeUrl(u) {
       const s = String(u || '').trim();
@@ -457,7 +457,7 @@
         const voices = window.speechSynthesis?.getVoices?.() || [];
         const preferred = voices.find(v => v.lang === lang) || voices.find(v => v.lang.startsWith(lang.split('-')[0]));
         return preferred || null;
-      } catch { return null; }
+      } catch (e) { return null; }
     }
     async function speakText(text, lang) {
       try {
@@ -468,7 +468,7 @@
         u.lang = lang;
         window.speechSynthesis.cancel();
         window.speechSynthesis.speak(u);
-      } catch { }
+      } catch (e) { }
     }
     async function playAudio(url, fallbackWord, lang) {
       const src = sanitizeUrl(url);
@@ -477,7 +477,7 @@
         const audio = new Audio(src);
         audio.crossOrigin = 'anonymous';
         audio.play().catch(async () => { await speakText(fallbackWord, lang); });
-      } catch { await speakText(fallbackWord, lang); }
+      } catch (e) { await speakText(fallbackWord, lang); }
     }
     function bindAudioControls() {
       const buttons = resEl.querySelectorAll('.audio-btn');
@@ -535,17 +535,17 @@
           }
           // 避免淡出动画与立即打开的竞争：延迟重开提升稳定性
           setTimeout(() => {
-            try { api().emitEvent(LOWBAR_CHANNEL, { type: 'update', target: 'floatingUrl', value: u.href }); } catch {}
+            try { api().emitEvent(LOWBAR_CHANNEL, { type: 'update', target: 'floatingUrl', value: u.href }); } catch (e) {}
           }, 220);
         } else {
           // 预览态（无 lowbarAPI）直接在本页导航，避免弹窗被拦截
           window.location.href = u.href;
         }
-      } catch {
+      } catch (e) {
         try {
           const u2 = new URL(window.location.href);
           window.location.href = u2.href;
-        } catch {}
+        } catch (e) {}
       }
     }
     const onInputSuggest = debounce((v) => fetchSuggest(v.toLowerCase()), 200);
@@ -565,7 +565,7 @@
       queryWord(lastWord);
     });
     document.getElementById('suggClose').addEventListener('click', () => {
-      try { window.__suggCollapsed__ = true; const box = document.getElementById('suggestions'); box.style.display = 'none'; box.innerHTML = ''; } catch {}
+      try { window.__suggCollapsed__ = true; const box = document.getElementById('suggestions'); box.style.display = 'none'; box.innerHTML = ''; } catch (e) {}
     });
     document.getElementById('query').addEventListener('click', async () => {
       const w = document.getElementById('wd').value.trim();
@@ -591,11 +591,11 @@
           lastWord = w.toLowerCase();
           queryWord(w.toLowerCase());
         }
-      } catch {}
+      } catch (e) {}
     })();
     // 悬浮窗本地关闭按钮：仅关闭当前浮窗，不改动整体底栏按钮
     document.getElementById('closeDictLocal')?.addEventListener('click', () => {
-      try { api()?.emitEvent?.(LOWBAR_CHANNEL, { type:'update', target:'floatingUrl', value: null }); } catch {}
+      try { api()?.emitEvent?.(LOWBAR_CHANNEL, { type:'update', target:'floatingUrl', value: null }); } catch (e) {}
     });
     // 智能自动补全位置：若底部空间不足，自动改为向上展开
     window.addEventListener('resize', () => {
@@ -607,7 +607,7 @@
         const spaceBelow = (window.innerHeight || 800) - rect.bottom;
         const needAbove = spaceBelow < 200 || document.body.classList.contains('bar-bottom');
         box.classList.toggle('above', !!needAbove);
-      } catch {}
+      } catch (e) {}
     });
   </script>
 </body>

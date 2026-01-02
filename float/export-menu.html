@@ -25,12 +25,12 @@
     <script>
       const CH='multiword.lowbar';
       document.getElementById('expImg').addEventListener('click', () => {
-        try { window.lowbarAPI.emitEvent(CH, { type:'control', action:'export', cmd:'image' }); } catch {}
-        try { window.lowbarAPI.emitEvent(CH, { type:'update', target:'floatingUrl', value: null }); } catch {}
+        try { window.lowbarAPI.emitEvent(CH, { type:'control', action:'export', cmd:'image' }); } catch (e) {}
+        try { window.lowbarAPI.emitEvent(CH, { type:'update', target:'floatingUrl', value: null }); } catch (e) {}
       });
       document.getElementById('expDoc').addEventListener('click', () => {
-        try { window.lowbarAPI.emitEvent(CH, { type:'control', action:'export', cmd:'word' }); } catch {}
-        try { window.lowbarAPI.emitEvent(CH, { type:'update', target:'floatingUrl', value: null }); } catch {}
+        try { window.lowbarAPI.emitEvent(CH, { type:'control', action:'export', cmd:'word' }); } catch (e) {}
+        try { window.lowbarAPI.emitEvent(CH, { type:'update', target:'floatingUrl', value: null }); } catch (e) {}
       });
     </script>
   </body>

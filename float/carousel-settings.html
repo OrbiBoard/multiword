@@ -63,9 +63,9 @@
     const dayselParam = String(qs.get('daysel')||'').trim();
     const state = { pool: [], selectedDays: new Set(dayselParam?dayselParam.split(',').map(s=>s.trim()).filter(Boolean):[]), month: null };
     async function fetchPool(){
-      try{ const u=new URL('/words', String(server||'').trim()); const r=await fetch(u.href); const j=await r.json(); state.pool = Array.isArray(j?.words) ? j.words : []; }catch{ state.pool = []; }
+      try{ const u=new URL('/words', String(server||'').trim()); const r=await fetch(u.href); const j=await r.json(); state.pool = Array.isArray(j?.words) ? j.words : []; }catch (e) { state.pool = []; }
     }
-    function fmtDay(ms){ try{ const tz='Asia/Shanghai'; const d=new Date(ms||Date.now()); const parts=new Intl.DateTimeFormat('zh-CN',{timeZone:tz,hour12:false,year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(d); const get=(t)=>parts.find(p=>p.type===t)?.value||''; return `${get('year')}-${get('month')}-${get('day')}`; } catch { const d=new Date(ms||Date.now()); return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-'); } }
+    function fmtDay(ms){ try{ const tz='Asia/Shanghai'; const d=new Date(ms||Date.now()); const parts=new Intl.DateTimeFormat('zh-CN',{timeZone:tz,hour12:false,year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(d); const get=(t)=>parts.find(p=>p.type===t)?.value||''; return `${get('year')}-${get('month')}-${get('day')}`; } catch (e) { const d=new Date(ms||Date.now()); return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-'); } }
     function buildWeekheads(){ const heads=['一','二','三','四','五','六','日']; h('weekheads').innerHTML=heads.map(x=>`<div class="weekday">${x}</div>`).join(''); }
     function buildCalendar(){
       const now=new Date(); const m=state.month||{y:now.getFullYear(), m:now.getMonth()+1};
@@ -112,13 +112,13 @@
             const start = fmt(startD);
             return `${start}~${end}`;
           }
-        } catch { return ''; }
+        } catch (e) { return ''; }
       })();
       if (rangeStr) params.range = rangeStr;
       try {
         const selDays = Array.from(state.selectedDays||new Set());
         if (selDays.length) {
-          if (!state.pool.length) { try { await fetchPool(); } catch {} }
+          if (!state.pool.length) { try { await fetchPool(); } catch (e) {} }
           let list = state.pool.filter(x => selDays.includes(fmtDay(x.createdAt||Date.now())));
           const ord = String(h('order').value||'new-old');
           if (ord==='new-old') list.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
@@ -133,7 +133,7 @@
           }
           params.selected = seq.join(',');
         } else {
-          if (!state.pool.length) { try { await fetchPool(); } catch {} }
+          if (!state.pool.length) { try { await fetchPool(); } catch (e) {} }
           const cutoff = Date.now() - 7*24*3600*1000;
           let list = state.pool.filter(x => (x.createdAt||0) >= cutoff);
           const ord = String(h('order').value||'new-old');
@@ -145,7 +145,7 @@
           for (const it of list) { const w=String(it.word||'').toLowerCase(); if(!seen.has(w)){ seen.add(w); seq.push(w); } }
           params.selected = seq.join(',');
         }
-      } catch { params.days = 7; }
+      } catch (e) { params.days = 7; }
       const bg = new URL('../background/carousel.html', window.location.href).href;
       window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'backgroundUrl', value: toUrl(bg, params) });
       window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'centerItems', value: [
@@ -163,7 +163,7 @@
       window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'floatingUrl', value: null });
     };
     h('backHome').onclick = () => { const home = new URL('./externallib.html', window.location.href).href; window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'floatingUrl', value: home }); };
-    h('btnPrev').onclick = () => { try { const float = new URL('./range-select.html', window.location.href).href; const href = toUrl(float, { server: String(server||'').trim(), next:'carousel', daysel: Array.from(state.selectedDays||new Set()).join(',') }); window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'floatingBounds', value: { width: 980, height: 680 } }); window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'floatingUrl', value: href }); } catch {} };
+    h('btnPrev').onclick = () => { try { const float = new URL('./range-select.html', window.location.href).href; const href = toUrl(float, { server: String(server||'').trim(), next:'carousel', daysel: Array.from(state.selectedDays||new Set()).join(',') }); window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'floatingBounds', value: { width: 980, height: 680 } }); window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'floatingUrl', value: href }); } catch (e) {} };
     h('btnNext').onclick = () => { h('startCarousel').click(); };
     (async function init(){ await fetchPool(); })();
   </script>
