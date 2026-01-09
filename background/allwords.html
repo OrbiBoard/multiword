@@ -56,7 +56,7 @@
           root.querySelectorAll('.row').forEach(r => {
             r.addEventListener('click', () => {
               const w = r.getAttribute('data-word');
-              try { api().pluginCall('multi.word','onLowbarEvent',[{ type:'click', id:'dictWord', word:String(w||'') }]); } catch (e) {}
+              try { api().pluginCall('multiword','onLowbarEvent',[{ type:'click', id:'dictWord', word:String(w||'') }]); } catch (e) {}
             });
           });
         } catch (e) {}
@@ -64,7 +64,7 @@
       async function load(){
         try {
           const qs = new URLSearchParams(window.location.search||'');
-          const r1 = await api().pluginCall('multi.word', 'getWordbankUrl', []);
+          const r1 = await api().pluginCall('multiword', 'getWordbankUrl', []);
           let base = String(r1?.url||'').trim();
           if (!base) base = String(qs.get('server')||'').trim();
           if (!base) base = 'http://localhost:6100';

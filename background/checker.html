@@ -31,7 +31,7 @@
     </div>
     <script>
       const api = () => window.lowbarAPI;
-      const CH = 'multiword.lowbar';
+      const CH = 'multiword-lowbar';
       const qs = new URLSearchParams(location.search || '');
       const selectedParam = String(qs.get('selected')||'').trim();
       const selectedList = selectedParam ? selectedParam.split(',').map(x=>x.trim().toLowerCase()).filter(Boolean) : [];
@@ -138,7 +138,7 @@
         try {
           wordEl.onclick = () => {
             const ww = String(list[idx]?.word||'');
-            try { api().pluginCall('multi.word','onLowbarEvent',[{ type:'click', id:'dictWord', word: ww }]); } catch (e) {}
+            try { api().pluginCall('multiword','onLowbarEvent',[{ type:'click', id:'dictWord', word: ww }]); } catch (e) {}
           };
         } catch (e) {}
       }
@@ -175,7 +175,7 @@
           Array.from(review.querySelectorAll('.row')).forEach(el=>{
             el.addEventListener('click', ()=>{
               const w = el.getAttribute('data-w')||'';
-              try { api().pluginCall('multi.word','onLowbarEvent',[{ type:'click', id:'dictWord', word: w }]); } catch (e) {}
+              try { api().pluginCall('multiword','onLowbarEvent',[{ type:'click', id:'dictWord', word: w }]); } catch (e) {}
             });
           });
         } catch (e) {}
@@ -232,7 +232,7 @@
         } catch (e) {}
       }
       function randomPick() {
-        try { api().pluginCall('rollcall.random','openRollcallTemplate',[]); } catch (e) {}
+        try { api().pluginCall('rollcall-random','openRollcallTemplate',[]); } catch (e) {}
       }
       function endCheck() { finish(); }
 

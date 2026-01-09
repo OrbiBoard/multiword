@@ -120,7 +120,7 @@
         if (lb && typeof lb.pluginCall === 'function') return lb;
         return {
           pluginCall: async (plugin, method, args = []) => {
-            if (plugin !== 'multi.word') return { ok: false, error: 'unsupported plugin in static preview' };
+            if (plugin !== 'multiword') return { ok: false, error: 'unsupported plugin in static preview' };
             if (method === 'getWordbankUrl') {
               const url = localStorage.getItem('multiword:wordbank:url') || '';
               return { ok: true, url };
@@ -252,7 +252,7 @@
       };
       const syncUrl = async () => {
         try {
-          const r = await api().pluginCall('multi.word', 'getWordbankUrl');
+          const r = await api().pluginCall('multiword', 'getWordbankUrl');
           const saved = (r && r.url) || '';
           let last = saved;
           if (!last) {
@@ -265,7 +265,7 @@
           if (ok) {
             showConnected(last);
             await loadWords(last);
-            if (!saved && last) { try { await api().pluginCall('multi.word', 'setWordbankUrl', [last]); } catch (e) {} }
+            if (!saved && last) { try { await api().pluginCall('multiword', 'setWordbankUrl', [last]); } catch (e) {} }
           } else {
             showBindOnly();
           }
@@ -275,7 +275,7 @@
         try {
           const s = urlEl.value.trim();
           if (!s) { statusEl.textContent = '未连接'; showBindOnly(); return; }
-          await api().pluginCall('multi.word', 'setWordbankUrl', [s]);
+          await api().pluginCall('multiword', 'setWordbankUrl', [s]);
           const ok = await fetchHealth(s);
           statusEl.textContent = ok ? ('服务器健康正常：' + s) : ('无法连接：' + s);
           if (ok) {
@@ -317,7 +317,7 @@
       } catch (e) {}
       document.getElementById('disconnect').addEventListener('click', async () => {
         try {
-          await api().pluginCall('multi.word', 'setWordbankUrl', ['']);
+          await api().pluginCall('multiword', 'setWordbankUrl', ['']);
           try { localStorage.removeItem('multiword.externallib.url'); } catch (e) {}
           statusEl.textContent = '未连接';
           showBindOnly();
@@ -329,7 +329,7 @@
         const cn = document.getElementById('wCN').value.trim();
         if (!word) { addResEl.textContent = '请输入英文单词'; return; }
         try {
-          const r = await api().pluginCall('multi.word', 'getWordbankUrl');
+          const r = await api().pluginCall('multiword', 'getWordbankUrl');
           const base = (r && r.url) || '';
           if (!base) { addResEl.textContent = '未连接服务器'; return; }
           const resp = await fetch(base.replace(/\/$/, '') + '/words', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ word, cn }) });

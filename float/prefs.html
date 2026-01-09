@@ -36,14 +36,15 @@
       const enCarouselEl = document.getElementById('enableCarousel');
       const shuffleEl = document.getElementById('shuffleAfterCarousel');
       const load = async () => {
-        try { const r = await api().pluginCall('multi.word', 'getPreferences'); const p = (r && r.prefs) || {}; voiceEl.value = p.voice || 'ALL'; enCarouselEl.checked = !!p.enableCarousel; shuffleEl.checked = !!p.shuffleAfterCarousel; } catch (e) {}
-      };
-      const save = async () => {
+        try { const r = await api().pluginCall('multiword', 'getPreferences'); const p = (r && r.prefs) || {}; voiceEl.value = p.voice || 'ALL'; enCarouselEl.checked = !!p.enableCarousel; shuffleEl.checked = !!p.shuffleAfterCarousel; } catch (e) {};
+      }
+        const save = async () => {
         const prefs = { voice: voiceEl.value, enableCarousel: enCarouselEl.checked, shuffleAfterCarousel: shuffleEl.checked };
-        try { await api().pluginCall('multi.word', 'savePreferences', [prefs]); alert('已保存，下次默认生效'); } catch (e) { alert('保存失败：' + (e?.message||e)); }
+        try { await api().pluginCall('multiword', 'savePreferences', [prefs]); alert('已保存，下次默认生效'); } catch (e) { alert('保存失败：' + (e?.message||e)); }
       };
       document.getElementById('save').addEventListener('click', save);
       load();
+
     </script>
   </body>
   </html>

@@ -6,7 +6,7 @@ let pluginApi = null;
 
 // 运行态状态
 const state = {
-  eventChannel: 'multiword.lowbar',
+  eventChannel: 'multiword-channel',
   floatPages: {},
   backgroundHome: '',
   defaultCenterItems: [
@@ -59,11 +59,11 @@ const functions = {
       };
 
       const params = {
-        id: 'multiword.lowbar',
+        id: 'multiword-lowbar',
         title: '多维单词',
         eventChannel: state.eventChannel,
         subscribeTopics: [state.eventChannel],
-        callerPluginId: 'multi.word',
+        callerPluginId: 'multiword',
         windowMode: 'fullscreen_only',
         icon: 'ri-book-2-line',
         // 默认相对尺寸设置，具体窗口在点击时用绝对尺寸覆盖
@@ -74,7 +74,7 @@ const functions = {
         backgroundUrl: state.backgroundHome,
         floatingUrl: null
       };
-      await pluginApi.call('ui.lowbar', 'openTemplate', [params]);
+      await pluginApi.call('ui-lowbar', 'openTemplate', [params]);
       return true;
     } catch (e) {
       return { ok: false, error: e?.message || String(e) };
@@ -203,7 +203,7 @@ const functions = {
     try {
       if (prefs && typeof prefs === 'object') {
         state.prefs = { ...state.prefs, ...prefs };
-        store.set('multi-word', 'prefs', state.prefs);
+        store.set('multiword', 'prefs', state.prefs);
         return { ok: true };
       }
       return { ok: false };
@@ -211,7 +211,7 @@ const functions = {
   },
   getPreferences: async () => {
     try {
-      const saved = store.get('multi-word', 'prefs');
+      const saved = store.get('multiword', 'prefs');
       if (saved && typeof saved === 'object') state.prefs = saved;
       return { ok: true, prefs: state.prefs };
     } catch (e) { return { ok: false, error: e?.message || String(e) }; }
@@ -258,7 +258,7 @@ const functions = {
   },
   getWordbankUrl: async () => {
     try {
-      const s = store.get('multi-word', 'wordbankUrl');
+      const s = store.get('multiword', 'wordbankUrl');
       if (typeof s === 'string') state.wordbankServerUrl = s;
       return { ok: true, url: state.wordbankServerUrl };
     } catch (e) { return { ok: false, error: e?.message || String(e) }; }
@@ -275,12 +275,12 @@ const init = async (api) => {
   api.splash.setStatus('plugin:init', '可通过动作打开 多维单词 窗口');
   api.splash.setStatus('plugin:init', '多维单词加载完成');
   try {
-    store.ensureDefaults('multi-word', { prefs: { voice: 'ALL', enableCarousel: true, shuffleAfterCarousel: false }, wordbankUrl: '' });
+    store.ensureDefaults('multiword', { prefs: { voice: 'ALL', enableCarousel: true, shuffleAfterCarousel: false }, wordbankUrl: '' });
   } catch (e) {}
 };
 
 module.exports = {
-  name: '多维单词',
+  name: 'multiword',
   version: '0.1.0',
   init,
   functions: {

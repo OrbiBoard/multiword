@@ -387,7 +387,7 @@
       try {
         let r;
         if (window.lowbarAPI && typeof window.lowbarAPI.pluginCall === 'function') {
-          r = await api().pluginCall('multi.word', 'dictLookup', [word]);
+          r = await api().pluginCall('multiword', 'dictLookup', [word]);
           // 兜底：当后端返回异常或无数据时，回退到前端本地+远端尝试
           const bad = !r || (r.ok === false) || (!r.remote && !r.local);
           if (bad) r = await lookupFallback(word);

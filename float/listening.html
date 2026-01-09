@@ -52,7 +52,7 @@
         const makeApi = () => window.lowbarAPI;
         const loadPrefs = async () => {
           try {
-            const r = await makeApi().pluginCall('multi.word', 'getPreferences');
+            const r = await makeApi().pluginCall('multiword', 'getPreferences');
             return (r && r.prefs) || { voice:'ALL', enableCarousel:true, shuffleAfterCarousel:false };
           } catch (e) { return { voice:'ALL', enableCarousel:true, shuffleAfterCarousel:false }; }
         };
