@@ -1,7 +1,7 @@
 const path = require('path');
 const url = require('url');
 const { app } = require('electron');
-const store = require(path.join(app.getAppPath(), 'src', 'main', 'store.js'));
+
 let pluginApi = null;
 
 // 运行态状态
@@ -203,7 +203,7 @@ const functions = {
     try {
       if (prefs && typeof prefs === 'object') {
         state.prefs = { ...state.prefs, ...prefs };
-        store.set('multiword', 'prefs', state.prefs);
+        pluginApi.store.set('prefs', state.prefs);
         return { ok: true };
       }
       return { ok: false };
@@ -211,7 +211,7 @@ const functions = {
   },
   getPreferences: async () => {
     try {
-      const saved = store.get('multiword', 'prefs');
+      const saved = pluginApi.store.get('prefs');
       if (saved && typeof saved === 'object') state.prefs = saved;
       return { ok: true, prefs: state.prefs };
     } catch (e) { return { ok: false, error: e?.message || String(e) }; }
@@ -252,13 +252,13 @@ const functions = {
     try {
       const s = String(urlStr || '').trim();
       state.wordbankServerUrl = s;
-      store.set('multi-word', 'wordbankUrl', s);
+      pluginApi.store.set('wordbankUrl', s);
       return { ok: true };
     } catch (e) { return { ok: false, error: e?.message || String(e) }; }
   },
   getWordbankUrl: async () => {
     try {
-      const s = store.get('multiword', 'wordbankUrl');
+      const s = pluginApi.store.get('wordbankUrl');
       if (typeof s === 'string') state.wordbankServerUrl = s;
       return { ok: true, url: state.wordbankServerUrl };
     } catch (e) { return { ok: false, error: e?.message || String(e) }; }
@@ -275,7 +275,16 @@ const init = async (api) => {
   api.splash.setStatus('plugin:init', '可通过动作打开 多维单词 窗口');
   api.splash.setStatus('plugin:init', '多维单词加载完成');
   try {
-    store.ensureDefaults('multiword', { prefs: { voice: 'ALL', enableCarousel: true, shuffleAfterCarousel: false }, wordbankUrl: '' });
+    const defaults = { prefs: { voice: 'ALL', enableCarousel: true, shuffleAfterCarousel: false }, wordbankUrl: '' };
+    const current = api.store.getAll() || {};
+    let changed = false;
+    Object.keys(defaults).forEach(k => {
+      if (!(k in current)) {
+        current[k] = defaults[k];
+        changed = true;
+      }
+    });
+    if (changed) api.store.setAll(current);
   } catch (e) {}
 };
 
