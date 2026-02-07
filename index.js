@@ -192,6 +192,9 @@ const functions = {
           emitUpdate('floatingBounds', { width: 280, height: 170 });
           emitUpdate('floatingUrl', href);
         }
+      } else if (payload.type === 'update') {
+        // 透传前端发起的更新请求（如页面跳转、尺寸调整）
+        emitUpdate(payload.target, payload.value);
       }
       return true;
     } catch (e) {
@@ -266,6 +269,14 @@ const functions = {
   getDefaultCenterItems: async () => {
     try { return { ok: true, items: state.defaultCenterItems }; }
     catch (e) { return { ok: false, error: e?.message || String(e) }; }
+  },
+  getTheme: async () => {
+    try {
+      if (pluginApi && pluginApi.theme && typeof pluginApi.theme.get === 'function') {
+        return pluginApi.theme.get();
+      }
+      return { ok: true, mode: 'system', color: '#238f4a' };
+    } catch (e) { return { ok: false, error: e?.message || String(e) }; }
   }
 };
 

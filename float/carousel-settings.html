@@ -147,8 +147,8 @@
         }
       } catch (e) { params.days = 7; }
       const bg = new URL('../background/carousel.html', window.location.href).href;
-      window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'backgroundUrl', value: toUrl(bg, params) });
-      window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'centerItems', value: [
+      window.lowbarAPI.emitEvent('multiword-channel', { type:'update', target:'backgroundUrl', value: toUrl(bg, params) });
+      window.lowbarAPI.emitEvent('multiword-channel', { type:'update', target:'centerItems', value: [
         { id:'carousel-prev', text:'上一页', icon:'ri-skip-back-line' },
         { id:'carousel-pause', text:'暂停', icon:'ri-pause-circle-line' },
         { id:'carousel-next', text:'下一页', icon:'ri-skip-forward-line' },
@@ -156,14 +156,14 @@
         { id:'open-carousel-settings', text:'轮播设置', icon:'ri-settings-3-line' },
         { id:'carousel-stop', text:'结束轮播', icon:'ri-stop-circle-line' }
       ] });
-      window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'leftItems', value: [
+      window.lowbarAPI.emitEvent('multiword-channel', { type:'update', target:'leftItems', value: [
         { id: 'go-home', text: '返回首页', icon: 'ri-home-3-line' },
         { id: 'export-open', text: '导出', icon: 'ri-download-2-line' }
       ] });
-      window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'floatingUrl', value: null });
+      window.lowbarAPI.emitEvent('multiword-channel', { type:'update', target:'floatingUrl', value: null });
     };
-    h('backHome').onclick = () => { const home = new URL('./externallib.html', window.location.href).href; window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'floatingUrl', value: home }); };
-    h('btnPrev').onclick = () => { try { const float = new URL('./range-select.html', window.location.href).href; const href = toUrl(float, { server: String(server||'').trim(), next:'carousel', daysel: Array.from(state.selectedDays||new Set()).join(',') }); window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'floatingBounds', value: { width: 980, height: 680 } }); window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'floatingUrl', value: href }); } catch (e) {} };
+    h('backHome').onclick = () => { const home = new URL('./externallib.html', window.location.href).href; window.lowbarAPI.emitEvent('multiword-channel', { type:'update', target:'floatingUrl', value: home }); };
+    h('btnPrev').onclick = () => { try { const float = new URL('./range-select.html', window.location.href).href; const href = toUrl(float, { server: String(server||'').trim(), next:'carousel', daysel: Array.from(state.selectedDays||new Set()).join(',') }); window.lowbarAPI.emitEvent('multiword-channel', { type:'update', target:'floatingBounds', value: { width: 980, height: 680 } }); window.lowbarAPI.emitEvent('multiword-channel', { type:'update', target:'floatingUrl', value: href }); } catch (e) {} };
     h('btnNext').onclick = () => { h('startCarousel').click(); };
     (async function init(){ await fetchPool(); })();
   </script>

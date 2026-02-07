@@ -76,7 +76,16 @@
     function buildCalendar(){ const now=new Date(); const m=state.month||{y:now.getFullYear(), m:now.getMonth()+1}; const first=new Date(m.y,m.m-1,1); const days=new Date(m.y,m.m,0).getDate(); const startIdx=(first.getDay()||7)-1; const counts={}; state.pool.forEach(w=>{ const k=fmtDay(w.createdAt||Date.now()); counts[k]=(counts[k]||0)+1; }); const cells=[]; for(let i=0;i<startIdx;i++) cells.push('<div></div>'); for(let d=1; d<=days; d++){ const k = `${String(m.y)}-${String(m.m).padStart(2,'0')}-${String(d).padStart(2,'0')}`; const c = counts[k]||0; const sel = state.selectedDays.has(k) ? ' sel' : ''; const dis = c>0 ? '' : ' disabled'; const isToday = (k===fmtDay(Date.now())) ? ' today' : ''; const countHtml = c>0 ? `<div class="count">${c}</div>` : ''; cells.push(`<div class="day${sel}${dis}${isToday}" data-day="${k}"><div class="num">${d}</div>${countHtml}</div>`); } const totalCells = startIdx + days; const needPad = Math.max(0, 7*6 - totalCells); for (let i=0;i<needPad;i++) cells.push('<div></div>'); h('monthTitle').textContent = `${m.y}年${String(m.m).padStart(2,'0')}月`; h('calendar').innerHTML = cells.join(''); }
     function bindCalendar(){ h('calendar').addEventListener('click',(ev)=>{ const cell=ev.target.closest('.day'); if(!cell) return; if(cell.classList.contains('disabled')) return; const k=cell.getAttribute('data-day'); if(state.selectedDays.has(k)) state.selectedDays.delete(k); else state.selectedDays.add(k); buildCalendar(); }); h('monthPrev').onclick=()=>{ const cur=state.month||{y:new Date().getFullYear(), m:new Date().getMonth()+1}; const nm={ y:cur.m===1?(cur.y-1):cur.y, m:cur.m===1?12:(cur.m-1)}; state.month=nm; buildCalendar(); }; h('monthNext').onclick=()=>{ const cur=state.month||{y:new Date().getFullYear(), m:new Date().getMonth()+1}; const nm={ y:cur.m===12?(cur.y+1):cur.y, m:cur.m===12?1:(cur.m+1)}; state.month=nm; buildCalendar(); }; }
     function buildQuickSelectors(){ const q=[{k:'today',t:'今天'},{k:'3',t:'近3天'},{k:'7',t:'近7天'},{k:'30',t:'近30天'},{k:'week',t:'本周'},{k:'month',t:'本月'},{k:'clear',t:'清空选择'}]; h('quickSel').innerHTML = q.map(x=>`<button class="quickbtn" data-k="${x.k}">${x.t}</button>`).join(''); document.querySelectorAll('.quickbtn').forEach(b=>{ b.addEventListener('click',()=>{ const k=String(b.getAttribute('data-k')||''); const now=new Date(); if(k==='clear'){ state.selectedDays.clear(); buildCalendar(); return; } if(k==='today'){ state.selectedDays=new Set([fmtDay(Date.now())]); buildCalendar(); return; } if(['3','7','30'].includes(k)){ const n=parseInt(k,10)||0; const s=new Set(); for(let i=0;i<n;i++){ const d=new Date(now.getFullYear(), now.getMonth(), now.getDate()-i); s.add(fmtDay(d)); } state.selectedDays=s; buildCalendar(); return; } if(k==='week'){ const wd=(now.getDay()||7)-1; const s=new Set(); for(let i=0;i<=wd;i++){ const d=new Date(now.getFullYear(), now.getMonth(), now.getDate()-i); s.add(fmtDay(d)); } state.selectedDays=s; buildCalendar(); return; } if(k==='month'){ const s=new Set(); const y=now.getFullYear(); const m=now.getMonth(); const days=new Date(y,m+1,0).getDate(); for(let d=1; d<=days; d++){ s.add(fmtDay(new Date(y,m,d))); } state.month={y, m:m+1}; state.selectedDays=s; buildCalendar(); return; } }); }); }
-    h('btnPrev').onclick = () => { try { window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'floatingUrl', value: new URL('./externallib.html', window.location.href).href }); } catch (e) {} };
+    h('btnPrev').onclick = () => {
+      const url = new URL('./externallib.html', window.location.href).href;
+      try {
+        if (window.lowbarAPI) {
+          window.lowbarAPI.emitEvent('multiword-channel', { type:'update', target:'floatingUrl', value: url });
+        } else {
+          window.location.href = url;
+        }
+      } catch (e) { window.location.href = url; }
+    };
     h('btnNext').onclick = () => {
       const target = next==='carousel' ? new URL('./carousel-settings.html', window.location.href).href
         : (next==='allwords' ? new URL('./allwords-settings.html', window.location.href).href : new URL('./check-setup.html', window.location.href).href);
@@ -86,9 +95,13 @@
       const href = toUrl(target, params);
       try {
         const lb = window.lowbarAPI;
-        if (lb) lb.emitEvent('multiword.lowbar', { type:'update', target:'floatingBounds', value:
-          next==='carousel' ? { width:740, height:520 } : (next==='allwords' ? { width:740, height:520 } : { width:840, height:580 }) });
-        lb.emitEvent('multiword.lowbar', { type:'update', target:'floatingUrl', value: href });
+        if (lb) {
+           lb.emitEvent('multiword-channel', { type:'update', target:'floatingBounds', value:
+             next==='carousel' ? { width:740, height:520 } : (next==='allwords' ? { width:740, height:520 } : { width:840, height:580 }) });
+           lb.emitEvent('multiword-channel', { type:'update', target:'floatingUrl', value: href });
+        } else {
+           location.href = href;
+        }
       } catch (e) { location.href = href; }
     };
     (async function init(){ await fetchPool(); buildWeekheads(); buildCalendar(); bindCalendar(); buildQuickSelectors(); try { const lb = window.lowbarAPI; lb && lb.emitEvent('multiword.lowbar', { type:'update', target:'floatingBounds', value: { width: 980, height: 680 } }); } catch (e) {} })();

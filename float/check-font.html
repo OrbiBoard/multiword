@@ -48,9 +48,9 @@
     h('apply').onclick = () => {
       const titlesize = parseInt(h('titlesize').value||'54',10)||54;
       const cnsize = parseInt(h('cnsize').value||'30',10)||30;
-      try { window.lowbarAPI.emitEvent('multiword.lowbar', { type:'control', action:'check', cmd:'set-font', titlesize, cnsize }); } catch (e) {}
+      try { window.lowbarAPI.emitEvent('multiword-channel', { type:'control', action:'check', cmd:'set-font', titlesize, cnsize }); } catch (e) {}
     };
-    h('close').onclick = () => { try { window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'floatingUrl', value: null }); } catch (e) {} };
+    h('close').onclick = () => { try { window.lowbarAPI.emitEvent('multiword-channel', { type:'update', target:'floatingUrl', value: null }); } catch (e) {} };
     try {
       document.querySelectorAll('.incdec[data-target]').forEach(btn => {
         btn.addEventListener('click', () => {

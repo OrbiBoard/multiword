@@ -23,7 +23,7 @@
       </div>
     </div>
     <script>
-      const CH='multiword.lowbar';
+      const CH='multiword-channel';
       document.getElementById('expImg').addEventListener('click', () => {
         try { window.lowbarAPI.emitEvent(CH, { type:'control', action:'export', cmd:'image' }); } catch (e) {}
         try { window.lowbarAPI.emitEvent(CH, { type:'update', target:'floatingUrl', value: null }); } catch (e) {}

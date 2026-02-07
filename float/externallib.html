@@ -5,63 +5,161 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>外部词库</title>
     <link rel="stylesheet" href="../../../renderer/remixicon-local.css" />
-  <style>
-      html, body { margin:0; padding:0 !important; }
-      body { font-family: system-ui, sans-serif; background:#121212; color:#e6e6e6; }
-      .wrap { padding: 16px; }
-      .wrap > .section:first-child { margin-top: 0; }
-      input, button { background:#1b1b1b; color:#e6e6e6; border:1px solid #2c2c2c; border-radius:8px; padding:6px 10px; }
-      /* 取消输入框选中时的黄色/高亮边线 */
-      input:focus, input:focus-visible, textarea:focus, button:focus { outline: none; box-shadow: none; border-color: #2c2c2c; }
-      /* 处理 WebKit 自动填充的黄色背景 */
-      input:-webkit-autofill {
-        -webkit-box-shadow: 0 0 0px 1000px #1b1b1b inset;
-        -webkit-text-fill-color: #e6e6e6;
-        caret-color: #e6e6e6;
+    <style>
+      :root {
+        --bg: #121212;
+        --fg: #e6e6e6;
+        --card-bg: #1f1f1f;
+        --border: #2c2c2c;
+        --input-bg: #1b1b1b;
+        --hover-bg: #2a2a2a;
+        --primary: #238f4a;
+        --primary-fg: #ffffff;
+        --shadow: 0 6px 12px rgba(0,0,0,0.12);
+        --shadow-hover: 0 10px 20px rgba(0,0,0,0.18);
+        --muted: rgba(255,255,255,0.6);
       }
-      /* 美化纵向滚动条 */
-      * { scrollbar-width: thin; scrollbar-color: #444 #1a1a1a; }
-      ::-webkit-scrollbar { width: 10px; }
-      ::-webkit-scrollbar-track { background: #1a1a1a; border-radius: 8px; }
-      ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #3b3b3b, #555); border-radius: 8px; border: 1px solid #2c2c2c; }
-      ::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, #4a4a4a, #666); }
-      .modes { display:flex; flex-wrap:wrap; gap:12px; margin-top: 16px; justify-content:center; }
-      @media (max-width: 840px) { .modes { justify-content:center; } }
-      .card { background:#1f1f1f; border:1px solid #2c2c2c; border-radius:10px; padding:14px; box-shadow: 0 6px 12px rgba(0,0,0,0.12); }
-      .card.square { width:140px; height:140px; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:6px; font-size:14px; transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease; cursor: pointer; }
-      .card.square i { font-size:28px; margin-bottom:4px; }
-      .card.square .label { font-size:14px; color:#e6e6e6; }
-      .card.square:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.18); border-color:#3a3a3a; }
-      .hero { text-align:center; padding:40px 20px; }
-      .hero h1 { font-size: 28px; margin:0 0 18px; color:#fafafa; }
-      .hero .row { display:flex; justify-content:center; gap:10px; }
-      .section { margin-top: 18px; }
-      table { width:100%; border-collapse: collapse; }
-      th, td { border:1px solid #2c2c2c; padding:8px; }
-      th { background:#1b1b1b; }
-      .subtle { opacity:.85; font-size: 13px; }
+
+      @media (prefers-color-scheme: light) {
+        :root {
+          --bg: #f3f4f6;
+          --fg: #1f2937;
+          --card-bg: #ffffff;
+          --border: #e5e7eb;
+          --input-bg: #f9fafb;
+          --hover-bg: #f3f4f6;
+          --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+          --shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+          --muted: #6b7280;
+        }
+      }
+
+      /* Dynamic Theme Overrides */
+      body.theme-light {
+        --bg: #f3f4f6;
+        --fg: #1f2937;
+        --card-bg: #ffffff;
+        --border: #e5e7eb;
+        --input-bg: #f9fafb;
+        --hover-bg: #f3f4f6;
+        --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        --shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        --muted: #6b7280;
+      }
+      body.theme-dark {
+        --bg: #121212;
+        --fg: #e6e6e6;
+        --card-bg: #1f1f1f;
+        --border: #2c2c2c;
+        --input-bg: #1b1b1b;
+        --hover-bg: #2a2a2a;
+        --shadow: 0 6px 12px rgba(0,0,0,0.12);
+        --shadow-hover: 0 10px 20px rgba(0,0,0,0.18);
+        --muted: rgba(255,255,255,0.6);
+      }
+
+      html, body { margin:0; padding:0 !important; height: 100%; }
+      body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--fg); transition: background 0.3s, color 0.3s; }
+      .wrap { padding: 24px; max-width: 800px; margin: 0 auto; }
+      
+      .section { margin-top: 24px; animation: fadeIn 0.3s ease; }
+      @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+      input, button { 
+        font-family: inherit;
+        background: var(--input-bg); 
+        color: var(--fg); 
+        border: 1px solid var(--border); 
+        border-radius: 8px; 
+        padding: 8px 12px; 
+        transition: all 0.2s;
+      }
+      
+      input:focus, button:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary); }
+      button { cursor: pointer; display: inline-flex; align-items: center; gap: 6px; justify-content: center; }
+      button:hover { background: var(--hover-bg); border-color: var(--primary); }
+      button:active { transform: translateY(1px); }
+      
+      button.primary { background: var(--primary); color: var(--primary-fg); border-color: var(--primary); }
+      button.primary:hover { opacity: 0.9; }
+
+      .card { 
+        background: var(--card-bg); 
+        border: 1px solid var(--border); 
+        border-radius: 12px; 
+        padding: 20px; 
+        box-shadow: var(--shadow); 
+      }
+      
+      .modes { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; margin-top: 24px; }
+      
+      .card.square { 
+        aspect-ratio: 1;
+        width: auto;
+        height: auto;
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        flex-direction: column; 
+        gap: 12px; 
+        transition: all 0.2s ease; 
+        cursor: pointer; 
+        user-select: none;
+      }
+      .card.square i { font-size: 32px; color: var(--primary); transition: transform 0.2s; }
+      .card.square .label { font-size: 15px; font-weight: 500; color: var(--fg); }
+      .card.square:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); border-color: var(--primary); }
+      .card.square:hover i { transform: scale(1.1); }
+      
+      .hero { text-align: center; padding: 40px 20px; }
+      .hero h1 { font-size: 24px; margin: 0 0 24px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 10px; }
+      .hero i { color: var(--primary); }
+      .hero .row { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+      
+      table { width: 100%; border-collapse: separate; border-spacing: 0; }
+      th, td { border-bottom: 1px solid var(--border); padding: 12px; text-align: left; }
+      th { background: var(--input-bg); font-weight: 600; color: var(--muted); font-size: 13px; }
+      th:first-child { border-top-left-radius: 8px; }
+      th:last-child { border-top-right-radius: 8px; }
+      tr:last-child td { border-bottom: none; }
+      
+      .subtle { color: var(--muted); font-size: 13px; }
+      
+      /* Scrollbar */
+      ::-webkit-scrollbar { width: 8px; height: 8px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+      ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+      .status-badge {
+        display: inline-flex; align-items: center; gap: 6px;
+        background: rgba(35, 143, 74, 0.1); 
+        color: var(--primary);
+        padding: 4px 12px; border-radius: 99px;
+        font-size: 13px; font-weight: 500;
+      }
     </style>
   </head>
   <body>
     <div class="wrap">
       <div id="bindPanel" class="section">
         <div class="hero">
-          <h1><i class="ri-plug-line"></i> 绑定服务器</h1>
+          <h1><i class="ri-database-2-line"></i> 绑定外部词库</h1>
           <div class="row">
-            <input id="url" placeholder="http://localhost:6100" style="min-width: 340px;" />
-            <button id="save"><i class="ri-link"></i> 连接服务器</button>
+            <input id="url" placeholder="http://localhost:6100" style="min-width: 300px;" />
+            <button id="save" class="primary"><i class="ri-link"></i> 连接服务器</button>
             <button id="showQRBind" title="生成二维码"><i class="ri-qr-code-line"></i></button>
           </div>
-          <div id="status" style="margin-top:10px; opacity:.9">未连接</div>
-          <div class="subtle" style="margin-top:6px;">支持 http(s)；连接后可在下方直接开启轮播或列表展示。</div>
+          <div id="status" class="subtle" style="margin-top:16px;">未连接</div>
+          <div class="subtle" style="margin-top:8px;">支持 http(s)；连接后可在下方直接开启轮播或列表展示。</div>
         </div>
       </div>
 
       <div id="connectedPanel" class="section" style="display:none;">
-        <div class="card" style="display:flex; align-items:center; gap:10px; justify-content:space-between;">
-          <div style="display:flex; align-items:center; gap:10px;">
-            <span class="subtle" style="background:#243a4a; border:1px solid #2f4d61; color:#d8ecff; padding:4px 10px; border-radius:999px; display:inline-flex; align-items:center; gap:6px;"><i class="ri-checkbox-circle-line"></i> 已连接</span>
-            <span id="connectedUrl" style="font-weight:600;"></span>
+        <div class="card" style="display:flex; align-items:center; gap:16px; justify-content:space-between; flex-wrap: wrap;">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <span class="status-badge"><i class="ri-checkbox-circle-line"></i> 已连接</span>
+            <span id="connectedUrl" style="font-weight:600; word-break: break-all;"></span>
           </div>
           <div style="display:flex; gap:8px;">
             <button id="showQR" title="显示二维码"><i class="ri-qr-code-line"></i></button>
@@ -71,25 +169,13 @@
 
         <div id="sectionAdd" class="section">
           <div class="card">
-            <b><i class="ri-add-line"></i> 添加词汇</b>
-            <div style="margin-top:8px; display:flex; gap:10px; align-items:center;">
-              <input id="wWord" placeholder="英文单词（不支持短语）" />
-              <input id="wCN" placeholder="汉语解释（可留空）" />
-              <button id="btnAdd"><i class="ri-save-2-line"></i> 添加</button>
+            <b style="display: block; margin-bottom: 12px;"><i class="ri-add-circle-line" style="color:var(--primary)"></i> 添加词汇</b>
+            <div style="display:flex; gap:10px; align-items:center; flex-wrap: wrap;">
+              <input id="wWord" placeholder="英文单词" style="flex:1; min-width: 120px;" />
+              <input id="wCN" placeholder="汉语解释（选填）" style="flex:1.5; min-width: 160px;" />
+              <button id="btnAdd" class="primary"><i class="ri-save-2-line"></i> 添加</button>
             </div>
-            <div id="addResult" style="margin-top:8px; opacity:.9"></div>
-          </div>
-        </div>
-
-        <div id="sectionList" class="section">
-          <div class="card">
-            <b><i class="ri-article-line"></i> 词库列表</b>
-            <div style="margin-top:8px;">
-              <table>
-                <thead><tr><th>单词</th><th>汉语</th><th>时间</th></tr></thead>
-                <tbody id="wordsTbody"></tbody>
-              </table>
-            </div>
+            <div id="addResult" class="subtle" style="margin-top:8px;"></div>
           </div>
         </div>
 
@@ -111,10 +197,22 @@
             <div class="label">快速检查</div>
           </div>
         </div>
+
+        <div id="sectionList" class="section">
+          <div class="card">
+            <b style="display: block; margin-bottom: 12px;"><i class="ri-file-list-line" style="color:var(--primary)"></i> 词库列表</b>
+            <div style="overflow-x: auto;">
+              <table>
+                <thead><tr><th>单词</th><th>汉语</th><th>时间</th></tr></thead>
+                <tbody id="wordsTbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
     <script>
-      // 在Electron环境中通过 lowbarAPI 调用插件；在静态预览中提供本地后备实现
+      // API Interface
       const api = () => {
         const lb = window.lowbarAPI;
         if (lb && typeof lb.pluginCall === 'function') return lb;
@@ -130,10 +228,49 @@
               localStorage.setItem('multiword:wordbank:url', s);
               return { ok: true };
             }
+            if (method === 'getTheme') {
+               // Fallback for preview
+               return { ok: true, mode: 'system', color: '#238f4a' };
+            }
             return { ok: false, error: 'unsupported method in static preview' };
-          }
+          },
+          emitEvent: () => {}
         };
       };
+
+      // Theme Handling
+      const applyTheme = async () => {
+        try {
+          const res = await api().pluginCall('multiword', 'getTheme');
+          if (res && res.ok) {
+            const { mode, color } = res;
+            if (mode === 'dark') {
+              document.body.classList.remove('theme-light');
+              document.body.classList.add('theme-dark');
+            } else if (mode === 'light') {
+              document.body.classList.remove('theme-dark');
+              document.body.classList.add('theme-light');
+            } else {
+              document.body.classList.remove('theme-dark', 'theme-light');
+            }
+            if (color) {
+              document.documentElement.style.setProperty('--primary', color);
+              // Calculate a lighter/darker variant if needed, but opacity works well for badges
+            }
+          }
+        } catch (e) { console.error('Theme apply failed', e); }
+      };
+
+      // Initial theme apply
+      applyTheme();
+      // Listen for system theme changes if mode is system (handled by CSS media query mostly, but class override helps)
+      if (window.matchMedia) {
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+          // Re-fetch theme config to check if we are in system mode
+          applyTheme();
+        });
+      }
+
       const statusEl = document.getElementById('status');
       const urlEl = document.getElementById('url');
       const bindPanel = document.getElementById('bindPanel');
@@ -146,88 +283,102 @@
 
       const showBindOnly = () => { bindPanel.style.display = ''; connectedPanel.style.display = 'none'; };
       const isLocalUrl = (u) => { try { const url = new URL(u); return ['localhost','127.0.0.1','::1'].includes(url.hostname); } catch (e) { return false; } };
+      
       const showConnected = (u) => {
         bindPanel.style.display = 'none'; connectedPanel.style.display = ''; connectedUrlEl.textContent = u;
-        // 界面简化：默认不提供数据设置，统一隐藏“添加词汇”和“词库列表”区块
         sectionAdd.style.display = 'none';
         sectionList.style.display = 'none';
-        // 绑定模式按钮：启动轮播与全部展示
+        
         try {
-          const h = (id) => document.getElementById(id);
           const toUrl = (page, params={}) => {
             const base = new URL(page, window.location.href);
             Object.entries(params).forEach(([k,v]) => base.searchParams.set(k, String(v)));
             return base.href;
           };
+          
+          const emit = (target, value) => {
+             // FIX: Use 'multiword-channel' instead of 'multiword.lowbar'
+             window.lowbarAPI.emitEvent('multiword-channel', { type:'update', target, value });
+          };
+
           const openCarousel = () => {
             const float = new URL('./range-select.html', window.location.href).href;
             const href = toUrl(float, { server: String(u||'').trim(), next:'carousel' });
-            window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'floatingBounds', value: { width: 980, height: 680 } });
-            window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'floatingUrl', value: href });
+            emit('floatingBounds', { width: 980, height: 680 });
+            emit('floatingUrl', href);
           };
           const openAll = () => {
             const float = new URL('./range-select.html', window.location.href).href;
             const href = toUrl(float, { server: String(u||'').trim(), next:'allwords' });
-            window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'floatingBounds', value: { width: 980, height: 680 } });
-            window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'floatingUrl', value: href });
+            emit('floatingBounds', { width: 980, height: 680 });
+            emit('floatingUrl', href);
           };
           const openCheck = () => {
             const float = new URL('./range-select.html', window.location.href).href;
             const href = toUrl(float, { server: String(u||'').trim(), next:'check' });
-            window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'floatingBounds', value: { width: 980, height: 680 } });
-            window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'floatingUrl', value: href });
+            emit('floatingBounds', { width: 980, height: 680 });
+            emit('floatingUrl', href);
           };
           const openQuick = () => {
             const float = new URL('./range-select.html', window.location.href).href;
             const href = toUrl(float, { server: String(u||'').trim(), next:'quickcheck' });
-            window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'floatingBounds', value: { width: 980, height: 680 } });
-            window.lowbarAPI.emitEvent('multiword.lowbar', { type:'update', target:'floatingUrl', value: href });
+            emit('floatingBounds', { width: 980, height: 680 });
+            emit('floatingUrl', href);
           };
-          // 卡片点击：上图标下文字，无嵌套按钮
-          try {
-            document.querySelectorAll('.modes .card.square').forEach(card => {
-              card.addEventListener('click', () => {
-                switch (card.getAttribute('data-act')) {
-                  case 'carousel': return openCarousel();
-                  case 'all': return openAll();
-                  case 'check': return openCheck();
-                  case 'quickcheck': return openQuick();
-                }
-              });
+
+          // Re-attach listeners safely (remove old ones if possible, but cloning is easier to clear events)
+          document.querySelectorAll('.modes .card.square').forEach(card => {
+            // Clone to strip old event listeners
+            const newCard = card.cloneNode(true);
+            card.parentNode.replaceChild(newCard, card);
+            
+            newCard.addEventListener('click', () => {
+              const act = newCard.getAttribute('data-act');
+              if (act === 'carousel') openCarousel();
+              else if (act === 'all') openAll();
+              else if (act === 'check') openCheck();
+              else if (act === 'quickcheck') openQuick();
             });
-          } catch (e) {}
-          // 保持首页为四个正方形卡片入口
-        } catch (e) {}
+          });
+        } catch (e) { console.error(e); }
+
+        // QR Code Handler
         try {
-          const btnQR = document.getElementById('showQR');
-          if (btnQR) {
-            btnQR.addEventListener('click', () => {
+            const btnQR = document.getElementById('showQR');
+            // Clone to strip old listeners
+            const newBtn = btnQR.cloneNode(true);
+            btnQR.parentNode.replaceChild(newBtn, btnQR);
+            
+            newBtn.addEventListener('click', () => {
               const text = String(u||'').trim();
               if (!text) return;
-              const overlay = document.createElement('div');
-              overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);display:grid;place-items:center;z-index:9999;';
-              const box = document.createElement('div');
-              box.style.cssText = 'background:#1f1f1f;border:1px solid #2c2c2c;border-radius:12px;padding:16px;min-width:280px;display:flex;flex-direction:column;gap:10px;align-items:center;';
-              const title = document.createElement('div');
-              title.textContent = '服务器地址二维码';
-              title.style.cssText = 'font-weight:600;';
-              const img = document.createElement('img');
-              img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=' + encodeURIComponent(text);
-              img.alt = text;
-              const link = document.createElement('div');
-              link.textContent = text;
-              link.style.cssText = 'font-size:12px;opacity:.85;word-break:break-all;';
-              const close = document.createElement('button');
-              close.innerHTML = '<i class="ri-close-line"></i> 关闭';
-              close.style.cssText = 'margin-top:6px;';
-              close.onclick = () => { try { document.body.removeChild(overlay); } catch (e) {} };
-              box.appendChild(title); box.appendChild(img); box.appendChild(link); box.appendChild(close);
-              overlay.appendChild(box);
-              overlay.addEventListener('click', (e) => { if (e.target === overlay) close.click(); });
-              document.body.appendChild(overlay);
+              showQRCode(text);
             });
-          }
-        } catch (e) {}
+        } catch(e) {}
+      };
+
+      const showQRCode = (text) => {
+        const overlay = document.createElement('div');
+        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);display:grid;place-items:center;z-index:9999;backdrop-filter:blur(2px);';
+        const box = document.createElement('div');
+        box.style.cssText = 'background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:24px;min-width:280px;display:flex;flex-direction:column;gap:16px;align-items:center;box-shadow:var(--shadow-hover);';
+        const title = document.createElement('div');
+        title.textContent = '服务器地址二维码';
+        title.style.cssText = 'font-weight:600;font-size:16px;';
+        const img = document.createElement('img');
+        img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(text);
+        img.alt = text;
+        img.style.borderRadius = '8px';
+        const link = document.createElement('div');
+        link.textContent = text;
+        link.style.cssText = 'font-size:12px;opacity:.85;word-break:break-all;text-align:center;max-width:240px;';
+        const close = document.createElement('button');
+        close.innerHTML = '<i class="ri-close-line"></i> 关闭';
+        close.onclick = () => { try { document.body.removeChild(overlay); } catch (e) {} };
+        box.appendChild(title); box.appendChild(img); box.appendChild(link); box.appendChild(close);
+        overlay.appendChild(box);
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) close.click(); });
+        document.body.appendChild(overlay);
       };
 
       const fetchHealth = async (base) => {
@@ -291,27 +442,7 @@
           btnQRBind.addEventListener('click', () => {
             const text = String(urlEl.value||'').trim();
             if (!text) return;
-            const overlay = document.createElement('div');
-            overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);display:grid;place-items:center;z-index:9999;';
-            const box = document.createElement('div');
-            box.style.cssText = 'background:#1f1f1f;border:1px solid #2c2c2c;border-radius:12px;padding:16px;min-width:280px;display:flex;flex-direction:column;gap:10px;align-items:center;';
-            const title = document.createElement('div');
-            title.textContent = '服务器地址二维码';
-            title.style.cssText = 'font-weight:600;';
-            const img = document.createElement('img');
-            img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=' + encodeURIComponent(text);
-            img.alt = text;
-            const link = document.createElement('div');
-            link.textContent = text;
-            link.style.cssText = 'font-size:12px;opacity:.85;word-break:break-all;';
-            const close = document.createElement('button');
-            close.innerHTML = '<i class="ri-close-line"></i> 关闭';
-            close.style.cssText = 'margin-top:6px;';
-            close.onclick = () => { try { document.body.removeChild(overlay); } catch (e) {} };
-            box.appendChild(title); box.appendChild(img); box.appendChild(link); box.appendChild(close);
-            overlay.appendChild(box);
-            overlay.addEventListener('click', (e) => { if (e.target === overlay) close.click(); });
-            document.body.appendChild(overlay);
+            showQRCode(text);
           });
         }
       } catch (e) {}
