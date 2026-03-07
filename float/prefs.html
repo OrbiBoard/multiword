@@ -6,12 +6,29 @@
     <title>偏好设置</title>
     <link rel="stylesheet" href="../../../renderer/remixicon-local.css" />
     <style>
-      body { margin:0; font-family: system-ui, sans-serif; background:#121212; color:#e6e6e6; }
+      :root {
+        --bg-primary: #121212;
+        --bg-secondary: #1f1f1f;
+        --bg-tertiary: #2c2c2c;
+        --text-primary: #e6e6e6;
+        --text-secondary: #adb5bd;
+        --border-color: #343a40;
+        --accent: #238f4a;
+      }
+      body { margin:0; font-family: system-ui, sans-serif; background:var(--bg-primary); color:var(--text-primary); }
       .wrap { padding: 12px; }
-      select, input, button { background:#1b1b1b; color:#e6e6e6; border:1px solid #2c2c2c; border-radius:8px; padding:6px 10px; margin:6px; }
+      select, input, button { background:var(--bg-tertiary); color:var(--text-primary); border:1px solid var(--border-color); border-radius:8px; padding:6px 10px; margin:6px; }
+      select:focus, input:focus, button:focus {
+        outline: none;
+        border-color: var(--accent);
+      }
+      button:hover {
+        background: var(--bg-secondary);
+      }
     </style>
   </head>
   <body>
+  <script src="../theme.js"></script>
     <div class="wrap">
       <div>
         <label>音色偏好

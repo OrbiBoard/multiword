@@ -6,15 +6,25 @@
     <title>多维单词 · 首页</title>
     <link rel="stylesheet" href="../../../renderer/remixicon-local.css" />
     <style>
-      body { margin:0; font-family: system-ui, sans-serif; background:#121212; color:#e6e6e6; }
+      :root {
+        --bg-primary: #121212;
+        --bg-secondary: #1f1f1f;
+        --bg-tertiary: #2c2c2c;
+        --text-primary: #e6e6e6;
+        --text-secondary: #adb5bd;
+        --border-color: #343a40;
+        --accent: #238f4a;
+      }
+      
+      body { margin:0; font-family: system-ui, sans-serif; background:var(--bg-primary); color:var(--text-primary); }
       .center { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 12px; }
-      .title { font-size: 28px; color: #f0f0f0; display:flex; align-items:center; gap:10px; }
+      .title { font-size: 28px; color: var(--text-primary); display:flex; align-items:center; gap:10px; }
       .btns { display:flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 8px; }
-      .rect-btn { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; width: 72px; height: 72px; border: none; background: #1b1b1b; border:1px solid #2c2c2c; border-radius: 10px; cursor: pointer; color: #ddd; transition: background 140ms ease; }
-      .rect-btn:hover { background: #232323; }
+      .rect-btn { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; width: 72px; height: 72px; border: none; background: var(--bg-secondary); border:1px solid var(--border-color); border-radius: 10px; cursor: pointer; color: var(--text-secondary); transition: background 140ms ease; }
+      .rect-btn:hover { background: var(--bg-tertiary); }
       .rect-btn i { font-size: 20px; }
       .rect-btn span { font-size: 12px; }
-      .hint { opacity: 0.9; max-width: 640px; text-align: center; }
+      .hint { opacity: 0.9; max-width: 640px; text-align: center; color: var(--text-secondary); }
     </style>
   </head>
   <body>
@@ -31,6 +41,7 @@
         <button class="rect-btn" data-id="about"><i class="ri-information-line"></i><span>关于插件</span></button>
       </div>
     </div>
+    <script src="../theme.js"></script>
     <script>
       const api = () => window.lowbarAPI;
       const CH = 'multiword.lowbar';
@@ -43,4 +54,4 @@
       });
     </script>
   </body>
-  </html>
+</html>

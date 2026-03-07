@@ -7,59 +7,19 @@
     <link rel="stylesheet" href="../../../renderer/remixicon-local.css" />
     <style>
       :root {
-        --bg: #121212;
-        --fg: #e6e6e6;
-        --card-bg: #1f1f1f;
-        --border: #2c2c2c;
-        --input-bg: #1b1b1b;
-        --hover-bg: #2a2a2a;
-        --primary: #238f4a;
-        --primary-fg: #ffffff;
+        --bg-primary: #121212;
+        --bg-secondary: #1f1f1f;
+        --bg-tertiary: #2c2c2c;
+        --text-primary: #e6e6e6;
+        --text-secondary: #adb5bd;
+        --border-color: #343a40;
+        --accent: #238f4a;
         --shadow: 0 6px 12px rgba(0,0,0,0.12);
         --shadow-hover: 0 10px 20px rgba(0,0,0,0.18);
-        --muted: rgba(255,255,255,0.6);
-      }
-
-      @media (prefers-color-scheme: light) {
-        :root {
-          --bg: #f3f4f6;
-          --fg: #1f2937;
-          --card-bg: #ffffff;
-          --border: #e5e7eb;
-          --input-bg: #f9fafb;
-          --hover-bg: #f3f4f6;
-          --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-          --shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-          --muted: #6b7280;
-        }
-      }
-
-      /* Dynamic Theme Overrides */
-      body.theme-light {
-        --bg: #f3f4f6;
-        --fg: #1f2937;
-        --card-bg: #ffffff;
-        --border: #e5e7eb;
-        --input-bg: #f9fafb;
-        --hover-bg: #f3f4f6;
-        --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        --shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        --muted: #6b7280;
-      }
-      body.theme-dark {
-        --bg: #121212;
-        --fg: #e6e6e6;
-        --card-bg: #1f1f1f;
-        --border: #2c2c2c;
-        --input-bg: #1b1b1b;
-        --hover-bg: #2a2a2a;
-        --shadow: 0 6px 12px rgba(0,0,0,0.12);
-        --shadow-hover: 0 10px 20px rgba(0,0,0,0.18);
-        --muted: rgba(255,255,255,0.6);
       }
 
       html, body { margin:0; padding:0 !important; height: 100%; }
-      body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--fg); transition: background 0.3s, color 0.3s; }
+      body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg-primary); color: var(--text-primary); transition: background 0.3s, color 0.3s; }
       .wrap { padding: 24px; max-width: 800px; margin: 0 auto; }
       
       .section { margin-top: 24px; animation: fadeIn 0.3s ease; }
@@ -67,25 +27,25 @@
 
       input, button { 
         font-family: inherit;
-        background: var(--input-bg); 
-        color: var(--fg); 
-        border: 1px solid var(--border); 
+        background: var(--bg-tertiary); 
+        color: var(--text-primary); 
+        border: 1px solid var(--border-color); 
         border-radius: 8px; 
         padding: 8px 12px; 
         transition: all 0.2s;
       }
       
-      input:focus, button:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary); }
+      input:focus, button:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
       button { cursor: pointer; display: inline-flex; align-items: center; gap: 6px; justify-content: center; }
-      button:hover { background: var(--hover-bg); border-color: var(--primary); }
+      button:hover { background: var(--bg-secondary); border-color: var(--accent); }
       button:active { transform: translateY(1px); }
       
-      button.primary { background: var(--primary); color: var(--primary-fg); border-color: var(--primary); }
+      button.primary { background: var(--accent); color: #ffffff; border-color: var(--accent); }
       button.primary:hover { opacity: 0.9; }
 
       .card { 
-        background: var(--card-bg); 
-        border: 1px solid var(--border); 
+        background: var(--bg-secondary); 
+        border: 1px solid var(--border-color); 
         border-radius: 12px; 
         padding: 20px; 
         box-shadow: var(--shadow); 
@@ -106,35 +66,35 @@
         cursor: pointer; 
         user-select: none;
       }
-      .card.square i { font-size: 32px; color: var(--primary); transition: transform 0.2s; }
-      .card.square .label { font-size: 15px; font-weight: 500; color: var(--fg); }
-      .card.square:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); border-color: var(--primary); }
+      .card.square i { font-size: 32px; color: var(--accent); transition: transform 0.2s; }
+      .card.square .label { font-size: 15px; font-weight: 500; color: var(--text-primary); }
+      .card.square:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); border-color: var(--accent); }
       .card.square:hover i { transform: scale(1.1); }
       
       .hero { text-align: center; padding: 40px 20px; }
       .hero h1 { font-size: 24px; margin: 0 0 24px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 10px; }
-      .hero i { color: var(--primary); }
+      .hero i { color: var(--accent); }
       .hero .row { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
       
       table { width: 100%; border-collapse: separate; border-spacing: 0; }
-      th, td { border-bottom: 1px solid var(--border); padding: 12px; text-align: left; }
-      th { background: var(--input-bg); font-weight: 600; color: var(--muted); font-size: 13px; }
+      th, td { border-bottom: 1px solid var(--border-color); padding: 12px; text-align: left; }
+      th { background: var(--bg-tertiary); font-weight: 600; color: var(--text-secondary); font-size: 13px; }
       th:first-child { border-top-left-radius: 8px; }
       th:last-child { border-top-right-radius: 8px; }
       tr:last-child td { border-bottom: none; }
       
-      .subtle { color: var(--muted); font-size: 13px; }
+      .subtle { color: var(--text-secondary); font-size: 13px; }
       
       /* Scrollbar */
       ::-webkit-scrollbar { width: 8px; height: 8px; }
       ::-webkit-scrollbar-track { background: transparent; }
-      ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-      ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+      ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+      ::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }
 
       .status-badge {
         display: inline-flex; align-items: center; gap: 6px;
         background: rgba(35, 143, 74, 0.1); 
-        color: var(--primary);
+        color: var(--accent);
         padding: 4px 12px; border-radius: 99px;
         font-size: 13px; font-weight: 500;
       }
@@ -169,7 +129,7 @@
 
         <div id="sectionAdd" class="section">
           <div class="card">
-            <b style="display: block; margin-bottom: 12px;"><i class="ri-add-circle-line" style="color:var(--primary)"></i> 添加词汇</b>
+            <b style="display: block; margin-bottom: 12px;"><i class="ri-add-circle-line" style="color:var(--accent)"></i> 添加词汇</b>
             <div style="display:flex; gap:10px; align-items:center; flex-wrap: wrap;">
               <input id="wWord" placeholder="英文单词" style="flex:1; min-width: 120px;" />
               <input id="wCN" placeholder="汉语解释（选填）" style="flex:1.5; min-width: 160px;" />
@@ -200,7 +160,7 @@
 
         <div id="sectionList" class="section">
           <div class="card">
-            <b style="display: block; margin-bottom: 12px;"><i class="ri-file-list-line" style="color:var(--primary)"></i> 词库列表</b>
+            <b style="display: block; margin-bottom: 12px;"><i class="ri-file-list-line" style="color:var(--accent)"></i> 词库列表</b>
             <div style="overflow-x: auto;">
               <table>
                 <thead><tr><th>单词</th><th>汉语</th><th>时间</th></tr></thead>
@@ -211,6 +171,7 @@
         </div>
       </div>
     </div>
+    <script src="../theme.js"></script>
     <script>
       // API Interface
       const api = () => {
@@ -237,39 +198,6 @@
           emitEvent: () => {}
         };
       };
-
-      // Theme Handling
-      const applyTheme = async () => {
-        try {
-          const res = await api().pluginCall('multiword', 'getTheme');
-          if (res && res.ok) {
-            const { mode, color } = res;
-            if (mode === 'dark') {
-              document.body.classList.remove('theme-light');
-              document.body.classList.add('theme-dark');
-            } else if (mode === 'light') {
-              document.body.classList.remove('theme-dark');
-              document.body.classList.add('theme-light');
-            } else {
-              document.body.classList.remove('theme-dark', 'theme-light');
-            }
-            if (color) {
-              document.documentElement.style.setProperty('--primary', color);
-              // Calculate a lighter/darker variant if needed, but opacity works well for badges
-            }
-          }
-        } catch (e) { console.error('Theme apply failed', e); }
-      };
-
-      // Initial theme apply
-      applyTheme();
-      // Listen for system theme changes if mode is system (handled by CSS media query mostly, but class override helps)
-      if (window.matchMedia) {
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-          // Re-fetch theme config to check if we are in system mode
-          applyTheme();
-        });
-      }
 
       const statusEl = document.getElementById('status');
       const urlEl = document.getElementById('url');

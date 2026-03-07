@@ -7,13 +7,21 @@
   <title>在线词典</title>
   <link rel="stylesheet" href="../../../renderer/remixicon-local.css" />
   <style>
+    :root {
+      --bg-primary: #121212;
+      --bg-secondary: #1f1f1f;
+      --bg-tertiary: #2c2c2c;
+      --text-primary: #e6e6e6;
+      --text-secondary: #adb5bd;
+      --border-color: #343a40;
+      --accent: #238f4a;
+    }
 
-    
     body {
       margin: 0;
       font-family: system-ui, sans-serif;
-      background: #121212;
-      color: #e6e6e6;
+      background: var(--bg-primary);
+      color: var(--text-primary);
     }
 
     .wrap {
@@ -22,9 +30,9 @@
 
     input,
     button {
-      background: #1b1b1b;
-      color: #e6e6e6;
-      border: 1px solid #2c2c2c;
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
       border-radius: 8px;
       padding: 6px 10px;
     }
@@ -36,7 +44,7 @@
     button:focus {
       outline: none;
       box-shadow: none;
-      border-color: #2c2c2c;
+      border-color: var(--accent);
     }
 
     .sugg-item:focus {
@@ -45,15 +53,15 @@
 
     /* 处理 WebKit 自动填充的黄色背景 */
     input:-webkit-autofill {
-      -webkit-box-shadow: 0 0 0px 1000px #1b1b1b inset;
-      -webkit-text-fill-color: #e6e6e6;
-      caret-color: #e6e6e6;
+      -webkit-box-shadow: 0 0 0px 1000px var(--bg-tertiary) inset;
+      -webkit-text-fill-color: var(--text-primary);
+      caret-color: var(--text-primary);
     }
 
     /* 美化纵向滚动条 */
     * {
       scrollbar-width: thin;
-      scrollbar-color: #444 #1a1a1a;
+      scrollbar-color: var(--border-color) var(--bg-primary);
     }
 
     ::-webkit-scrollbar {
@@ -61,18 +69,18 @@
     }
 
     ::-webkit-scrollbar-track {
-      background: #1a1a1a;
+      background: var(--bg-primary);
       border-radius: 8px;
     }
 
     ::-webkit-scrollbar-thumb {
-      background: linear-gradient(180deg, #3b3b3b, #555);
+      background: var(--border-color);
       border-radius: 8px;
-      border: 1px solid #2c2c2c;
+      border: 1px solid var(--border-color);
     }
 
     ::-webkit-scrollbar-thumb:hover {
-      background: linear-gradient(180deg, #4a4a4a, #666);
+      background: var(--text-secondary);
     }
 
     .sugg-box {
@@ -85,8 +93,8 @@
       position: absolute;
       top: 100%;
       left: 0;
-      background: #1b1b1b;
-      border: 1px solid #2c2c2c;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
       border-radius: 8px;
       margin-top: 4px;
       max-height: 180px;
@@ -104,17 +112,17 @@
       padding: 6px 10px;
       border: none;
       background: transparent;
-      color: #e6e6e6;
+      color: var(--text-primary);
     }
 
     .sugg-item:hover {
-      background: #262626;
+      background: var(--bg-secondary);
     }
 
     .result {
       margin-top: 10px;
-      background: #1f1f1f;
-      border: 1px solid #2c2c2c;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
       border-radius: 10px;
       padding: 12px;
     }
@@ -122,7 +130,7 @@
     .result h3 {
       margin: 0 0 6px;
       font-size: 16px;
-      color: #fafafa;
+      color: var(--text-primary);
     }
 
     .pos-list {
@@ -136,13 +144,15 @@
       display: inline-flex;
       gap: 6px;
       padding: 4px 8px;
-      background: #1b1b1b;
-      border: 1px solid #2c2c2c;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
       border-radius: 999px;
+      color: var(--text-primary);
     }
 
     .muted {
       opacity: .85;
+      color: var(--text-secondary);
     }
 
     .grid2 {
@@ -158,7 +168,7 @@
     }
 
     a.audio {
-      color: #9bd;
+      color: var(--accent);
       text-decoration: none;
     }
 
@@ -192,36 +202,39 @@
     .tab {
       padding: 4px 10px;
       border-radius: 999px;
-      background: #1b1b1b;
-      border: 1px solid #2c2c2c;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
       cursor: pointer;
       min-height: 32px;
       display: flex;
       align-items: center;
+      color: var(--text-primary);
     }
 
     .tab:hover {
-      background: #242424;
+      background: var(--bg-secondary);
+      border-color: var(--accent);
     }
 
     .ai-card h3 {
       margin: 0 0 6px;
       font-size: 16px;
-      color: #fafafa;
+      color: var(--text-primary);
     }
 
     .ai-text {
       white-space: pre-wrap;
       line-height: 1.6;
+      color: var(--text-primary);
     }
 
     .result.ai-card {
       max-height: none;
     }
 
-    .topbar { position: sticky; top: 0; z-index: 20; background: #121212; padding: 8px 0; border-bottom: 1px solid #2c2c2c; box-shadow: 0 6px 12px rgba(0,0,0,0.12); }
+    .topbar { position: sticky; top: 0; z-index: 20; background: var(--bg-primary); padding: 8px 0; border-bottom: 1px solid var(--border-color); box-shadow: 0 6px 12px rgba(0,0,0,0.12); }
     /* 全屏底栏模式：将顶栏改为底栏，避免与外层底栏冲突 */
-    body.bar-bottom .topbar { position: fixed; top: auto; bottom: 0; left: 0; right: 0; border-bottom: none; border-top: 1px solid #2c2c2c; box-shadow: 0 -6px 12px rgba(0,0,0,0.12); }
+    body.bar-bottom .topbar { position: fixed; top: auto; bottom: 0; left: 0; right: 0; border-bottom: none; border-top: 1px solid var(--border-color); box-shadow: 0 -6px 12px rgba(0,0,0,0.12); }
     body.bar-bottom .wrap { padding-bottom: 62px; } /* 为底栏留出空间 */
     /* 自动补全框：在底栏模式下默认尝试上翻，避免被底部遮挡 */
     .sugg-list.above { top: auto; bottom: 100%; margin-top: 0; margin-bottom: 4px; box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.35); }
@@ -230,6 +243,7 @@
 </head>
 
 <body>
+  <script src="../theme.js"></script>
   <div class="wrap">
     <div class="row topbar">
       <div class="sugg-box">

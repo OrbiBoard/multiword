@@ -6,9 +6,20 @@
     <title>关于插件</title>
     <link rel="stylesheet" href="../../../renderer/remixicon-local.css" />
     <style>
-      body { margin:0; font-family: system-ui, sans-serif; background:#121212; color:#e6e6e6; }
+      :root {
+        --bg-primary: #121212;
+        --bg-secondary: #1f1f1f;
+        --bg-tertiary: #2c2c2c;
+        --text-primary: #e6e6e6;
+        --text-secondary: #adb5bd;
+        --border-color: #343a40;
+        --accent: #238f4a;
+      }
+      
+      body { margin:0; font-family: system-ui, sans-serif; background:var(--bg-primary); color:var(--text-primary); }
       .wrap { padding: 16px; }
-      .card { background:#1f1f1f; border:1px solid #2c2c2c; border-radius:10px; padding:14px; }
+      .card { background:var(--bg-secondary); border:1px solid var(--border-color); border-radius:10px; padding:14px; }
+      h2 { color:var(--text-primary); margin-top:0; }
     </style>
   </head>
   <body>
@@ -19,5 +30,6 @@
         <div>说明：基于“UI模板-低栏应用”实现的单词学习辅助插件，支持听力、自测、检查、外部词库与在线词典等模块（外部词库和在线词库外功能暂未实现完毕）。</div>
       </div>
     </div>
+    <script src="../theme.js"></script>
   </body>
-  </html>
+</html>
