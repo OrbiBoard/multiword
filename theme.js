@@ -109,9 +109,16 @@ class ThemeManager {
 
   async loadTheme() {
     try {
-      const { ipcRenderer } = require('electron');
-      const result = await ipcRenderer.invoke('config:getTheme');
-      if (result.ok) {
+      let result;
+      if (typeof window !== 'undefined' && window.lowbarAPI && window.lowbarAPI.configGet) {
+        result = await window.lowbarAPI.configGet('global', 'theme');
+      } else if (typeof require === 'function') {
+        const { ipcRenderer } = require('electron');
+        result = await ipcRenderer.invoke('config:getTheme');
+      } else {
+        result = null;
+      }
+      if (result && result.ok) {
         this.theme = {
           mode: result.mode || 'system',
           color: result.color || '#238f4a'
@@ -124,18 +131,28 @@ class ThemeManager {
 
   setupThemeListeners() {
     try {
-      const { ipcRenderer } = require('electron');
-      
-      ipcRenderer.on('sys:theme-changed', (_e, theme) => {
-        if (theme) {
-          this.theme = {
-            mode: theme.mode || this.theme.mode,
-            color: theme.color || this.theme.color
-          };
-          this.applyTheme();
-        }
-      });
-      
+      if (typeof window !== 'undefined' && window.lowbarAPI && window.lowbarAPI.onConfigChanged) {
+        window.lowbarAPI.onConfigChanged((payload) => {
+          if (payload && payload.key === 'theme') {
+            this.theme = {
+              mode: payload.value?.mode || this.theme.mode,
+              color: payload.value?.color || this.theme.color
+            };
+            this.applyTheme();
+          }
+        });
+      } else if (typeof require === 'function') {
+        const { ipcRenderer } = require('electron');
+        ipcRenderer.on('sys:theme-changed', (_e, theme) => {
+          if (theme) {
+            this.theme = {
+              mode: theme.mode || this.theme.mode,
+              color: theme.color || this.theme.color
+            };
+            this.applyTheme();
+          }
+        });
+      }
       if (window.matchMedia) {
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
           if (this.theme.mode === 'system') {
